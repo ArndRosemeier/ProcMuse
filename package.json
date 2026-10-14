@@ -1,0 +1,32 @@
+{
+  "name": "procmuse",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Procedural music engine (headless library) plus a funky, accessible app built on it.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "typecheck": "tsc -b",
+    "test": "vitest run && node --test \"tools/**/*.test.mjs\"",
+    "build": "tsc -b && npm run build -w @procmuse/app",
+    "dev": "npm run dev -w @procmuse/app",
+    "render": "tsc -b packages/engine && node packages/engine/scripts/render.mjs",
+    "dup:candidates": "node tools/duplicate-candidates/find-duplicate-candidates.mjs --src packages",
+    "repeated:code": "node tools/repeated-code/find-repeated-code.mjs --src packages",
+    "gate": "bash scripts/gate.sh",
+    "board": "bash scripts/board.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  },
+  "license": "MIT"
+}

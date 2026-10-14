@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+/reports/
+/.gate-logs/
+/.gate-lock/
+/worktrees/
+/renders/
+.DS_Store

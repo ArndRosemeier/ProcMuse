@@ -1,0 +1,16 @@
+{
+  "name": "@procmuse/engine",
+  "version": "0.1.0",
+  "description": "Headless procedural music engine: composer, synthesizer and mixer in pure TypeScript. Runs in an AudioWorklet, a worker, or Node.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "license": "MIT"
+}
