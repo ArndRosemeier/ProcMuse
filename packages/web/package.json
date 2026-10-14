@@ -1,0 +1,27 @@
+{
+  "name": "@procmuse/web",
+  "version": "0.1.0",
+  "description": "Browser host for the ProcMuse engine: AudioWorklet processor and a main-thread WebEngine facade.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./processor": {
+      "source": "./src/processor.ts",
+      "types": "./dist/processor.d.ts",
+      "import": "./dist/processor.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@procmuse/engine": "0.1.0"
+  },
+  "license": "MIT"
+}

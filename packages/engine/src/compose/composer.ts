@@ -12,7 +12,7 @@ import { generateBass } from './generators/bass.js';
 import { generateDrums } from './generators/drums.js';
 import { generateArp, generateChords, generatePad } from './generators/harmony.js';
 import { createMotif, generateLead, generateTexture } from './generators/melody.js';
-import { PART_IDS, type PartId } from './parts.js';
+import { PART_IDS, partRecord, type PartId } from './parts.js';
 import type { Style } from './style.js';
 import { BEATS_PER_BAR } from './rhythm.js';
 import type { BarContext, Macros, NoteEvent, PartMemory, Section, SectionChoices, SectionKind, Theme } from './types.js';
@@ -77,7 +77,7 @@ export class Composer {
     this.inputs = inputs;
     this.rng = new Rng(seed);
     this.autoKey = this.rng.fork('key').int(0, 11);
-    this.memory = Object.fromEntries(PART_IDS.map((p) => [p, { voicing: null, lastPitch: null }])) as Record<PartId, PartMemory>;
+    this.memory = partRecord(() => ({ voicing: null, lastPitch: null }));
   }
 
   /** Forces the next bar to start a new section of `kind` (or the planned one). */

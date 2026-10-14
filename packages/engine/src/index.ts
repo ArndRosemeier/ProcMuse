@@ -26,6 +26,8 @@ export {
   type EnumOption,
   type ParamValue,
   type ParamValues,
+  type ParamSource,
+  type ParamListener,
 } from './core/params.js';
 export { ProcMuseError, type ProcMuseErrorCode } from './core/errors.js';
 export { Rng, hash32 } from './core/rng.js';
@@ -33,9 +35,10 @@ export { Emitter } from './core/emitter.js';
 export { MusicStateTracker, type MusicState } from './state/tracker.js';
 export { renderOffline, type OfflineOptions, type OfflineResult } from './render/offline.js';
 export { encodeWav } from './render/wav.js';
-export { PART_IDS, PART_INFO, type PartId, type PartInfo } from './compose/parts.js';
+export { PART_IDS, PART_INFO, partRecord, type PartId, type PartInfo } from './compose/parts.js';
 export { STYLES, DEFAULT_STYLE_ID, getStyle } from './compose/styles.js';
 export type { Style } from './compose/style.js';
 export { SECTION_KINDS, type SectionKind } from './compose/types.js';
 export { BUILTIN_PATCHES, getPatch } from './instruments/registry.js';
 export type { Patch, PatchCategory } from './instruments/patch.js';
+export { clamp, clamp01, lerp, dbToGain, gainToDb } from './core/math.js';

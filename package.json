@@ -20,10 +20,13 @@
     "dup:candidates": "node tools/duplicate-candidates/find-duplicate-candidates.mjs --src packages",
     "repeated:code": "node tools/repeated-code/find-repeated-code.mjs --src packages",
     "gate": "bash scripts/gate.sh",
-    "board": "bash scripts/board.sh"
+    "board": "bash scripts/board.sh",
+    "e2e": "npm run build && node scripts/e2e.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "happy-dom": "^21.0.1",
+    "playwright-core": "^1.56.1",
     "typescript": "~5.9.3",
     "vite": "^8.3.4",
     "vitest": "^5.0.4"

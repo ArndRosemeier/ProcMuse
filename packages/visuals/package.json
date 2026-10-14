@@ -1,0 +1,19 @@
+{
+  "name": "@procmuse/visuals",
+  "version": "0.1.0",
+  "description": "WebGL2 music-reactive scenes driven by ProcMuse MusicState (4k-inspired).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "dependencies": {
+    "@procmuse/engine": "0.1.0"
+  },
+  "license": "MIT"
+}

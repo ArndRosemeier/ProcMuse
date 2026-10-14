@@ -1,0 +1,13 @@
+# The decision ledger
+
+Append-only. Quote the owner verbatim; name evidence, what was rejected and what is unproven.
+
+| n | statement | files | why | status |
+| ---: | --- | --- | --- | --- |
+| 1 | **Build the full architecture from the start, as a library plus an app.** Owner, verbatim: *"i think thinking BIG is the correct approach here. Start building the full thing from the ground up, there is no need for a quick win. I would like this to be robust, without code multiplication ... this is no longer demo code, but a library + a to use it. That happens to be funky."* Rejected: the "live 4k" vertical slice first (Claude's proposal), because the owner judged it would be extended until it breaks. | all | scope | LANDED |
+| 2 | **The owner merges nothing; Claude merges to `main`.** Owner, verbatim: *"You always merge to main yourself. Thats where i publish from."* So `main` only receives gate-green work. | process | publishing | LANDED |
+| 3 | **Web Audio + AudioWorklet, pure-TypeScript DSP, synthesis first.** The engine renders sample by sample in TS (`EngineCore.process`), the same path live and offline. Rejected: native/WASM now (kept possible: the engine has no Web Audio dependency); samples first (synthesis is small, variable and fits the 4k spirit; a `sample` oscillator type can be added to `OscSpec`). Measured: ~11–20× realtime offline in Node at 44.1 kHz with all ten parts. Unproven: headroom on low-end phones. | `packages/engine` | performance and portability | LANDED |
+| 4 | **One voice architecture; instruments and styles are data.** Drums included, every instrument is a `Patch` rendered by `Voice`; every genre is a `Style` over shared generators. Rejected: a class per instrument/genre (code multiplication). Pinned in `test/pins.test.ts`. | `instruments/`, `compose/` | no duplication | LANDED |
+| 5 | **Every control is a declared `ParamSpec`; the UI is generated from specs.** Gives labels, descriptions (screen readers), presets and a host-app API from one declaration. Rejected: hand-built controls per panel. | `paramSpecs.ts`, `packages/ui` | accessibility and reuse | LANDED |
+| 6 | **Changing style resets tempo, instruments and mix to the style's defaults.** Rejected: keeping user overrides across styles (instruments from one genre rarely fit another). Unproven: whether the owner wants a "keep my mix" option. | `engine/core.ts` | predictable styles | LANDED |
+| 7 | **Flashes default OFF; reduced motion respected.** The 4k white-flash cuts would fail photosensitivity guidance, so the visuals carry a flash limiter and a `reduceMotion` switch. | `packages/visuals` | accessibility | LANDED |

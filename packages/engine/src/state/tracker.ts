@@ -6,7 +6,7 @@
  * Events arrive early (the audio is rendered ahead of what is heard), so the
  * tracker holds them until the listener's clock reaches their time.
  */
-import { PART_IDS, type PartId } from '../compose/parts.js';
+import { PART_IDS, partRecord, type PartId } from '../compose/parts.js';
 import type { SectionKind } from '../compose/types.js';
 import type { EngineEvent } from '../engine/events.js';
 
@@ -48,13 +48,11 @@ const HIT_DECAY: Record<PartId, number> = {
   texture: 0.8,
 };
 
-function zeros(): Record<PartId, number> {
-  return Object.fromEntries(PART_IDS.map((p) => [p, 0])) as Record<PartId, number>;
-}
+const zeros = () => partRecord(() => 0);
 
 export class MusicStateTracker {
   private pending: EngineEvent[] = [];
-  private lastHit: Record<PartId, number> = Object.fromEntries(PART_IDS.map((p) => [p, -1e9])) as Record<PartId, number>;
+  private lastHit = partRecord(() => -1e9);
   private hitVel = zeros();
   private beatTime = 0;
   private sectionStartTime = 0;

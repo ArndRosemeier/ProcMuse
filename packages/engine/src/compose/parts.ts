@@ -26,4 +26,9 @@ export const PART_INFO: Record<PartId, PartInfo> = {
   texture: { label: 'Texture', description: 'Atmospheres, drones and risers.', categories: ['texture'], ducked: true },
 };
 
-export const PART_INDEX: Record<PartId, number> = Object.fromEntries(PART_IDS.map((p, i) => [p, i])) as Record<PartId, number>;
+/** Builds a record with one entry per part: the one way to make per-part tables. */
+export function partRecord<T>(make: (part: PartId, index: number) => T): Record<PartId, T> {
+  return Object.fromEntries(PART_IDS.map((p, i) => [p, make(p, i)])) as Record<PartId, T>;
+}
+
+export const PART_INDEX: Record<PartId, number> = partRecord((_p, i) => i);

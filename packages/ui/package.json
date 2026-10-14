@@ -1,0 +1,19 @@
+{
+  "name": "@procmuse/ui",
+  "version": "0.1.0",
+  "description": "Accessible, translucent, movable control panels generated from ProcMuse parameter specs.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "dependencies": {
+    "@procmuse/engine": "0.1.0"
+  },
+  "license": "MIT"
+}

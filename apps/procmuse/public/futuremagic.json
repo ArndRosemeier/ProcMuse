@@ -1,0 +1,8 @@
+{
+  "title": "ProcMuse",
+  "tagline": "Endless procedural music with a demoscene light show you can steer.",
+  "tags": ["music", "procedural", "webaudio", "webgl", "accessible"],
+  "screenshot": "screenshot.png",
+  "description": "A procedural music engine with seven styles, forty-five synthesized instruments and a music-reactive, 4k-inspired background. Translucent, movable panels let you shape the mood, the band and the visuals, fully by keyboard or screen reader.",
+  "cta": "Start the music"
+}

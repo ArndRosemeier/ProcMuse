@@ -3,6 +3,18 @@
   "references": [
     {
       "path": "packages/engine"
+    },
+    {
+      "path": "packages/web"
+    },
+    {
+      "path": "packages/visuals"
+    },
+    {
+      "path": "packages/ui"
+    },
+    {
+      "path": "apps/procmuse"
     }
   ]
 }

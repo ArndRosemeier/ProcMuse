@@ -1,0 +1,18 @@
+{
+  "name": "@procmuse/app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ProcMuse: a procedural music generator with a 4k-inspired animated background and an accessible floating control surface.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@procmuse/engine": "0.1.0",
+    "@procmuse/ui": "0.1.0",
+    "@procmuse/visuals": "0.1.0",
+    "@procmuse/web": "0.1.0"
+  }
+}

@@ -84,8 +84,19 @@ export function validateParamValue(spec: ParamSpec, value: unknown): ParamValue 
 
 export type ParamListener = (id: string, value: ParamValue) => void;
 
+/**
+ * Anything that exposes declared parameters. The UI binds to this one shape,
+ * whether the values live in this thread (ParamStore) or another (WebEngine).
+ */
+export interface ParamSource {
+  readonly specs: readonly ParamSpec[];
+  get(id: string): ParamValue;
+  set(id: string, value: ParamValue): void;
+  onParam(fn: ParamListener): () => void;
+}
+
 /** Holds the current value of every declared parameter. */
-export class ParamStore {
+export class ParamStore implements ParamSource {
   readonly specs: readonly ParamSpec[];
   private readonly byId = new Map<string, ParamSpec>();
   private readonly values = new Map<string, ParamValue>();
@@ -151,7 +162,7 @@ export class ParamStore {
     return Object.fromEntries(this.values);
   }
 
-  onChange(fn: ParamListener): () => void {
+  onParam(fn: ParamListener): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
   }

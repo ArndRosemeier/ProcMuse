@@ -6,7 +6,7 @@
  * dependency on Web Audio, the DOM, or timers.
  */
 import { Composer, type ComposerInputs, type PartMode } from '../compose/composer.js';
-import { PART_IDS, PART_INDEX, type PartId } from '../compose/parts.js';
+import { PART_IDS, PART_INDEX, partRecord, type PartId } from '../compose/parts.js';
 import { getStyle } from '../compose/styles.js';
 import { BEATS_PER_BAR } from '../compose/rhythm.js';
 import type { Macros, SectionKind } from '../compose/types.js';
@@ -83,7 +83,7 @@ export class EngineCore {
     };
     this.composer = new Composer(params.number(P.seed), this.inputs);
     PART_IDS.forEach((p, i) => this.loadInstrument(p, i));
-    params.onChange((id, value) => this.onParam(id, value));
+    params.onParam((id, value) => this.onParam(id, value));
   }
 
   /** Receives every event the engine emits. One listener (the host); fan-out is the host's job. */
@@ -329,8 +329,7 @@ export class EngineCore {
     this.mixer.finish(outL, outR, frames);
     if (this.time - this.lastLevels >= LEVELS_INTERVAL) {
       this.lastLevels = this.time;
-      const parts = {} as Record<PartId, number>;
-      PART_IDS.forEach((p, i) => (parts[p] = this.mixer.channels[i]?.level ?? 0));
+      const parts = partRecord((_p, i) => this.mixer.channels[i]?.level ?? 0);
       this.emit({ type: 'levels', time: this.time, parts, master: this.mixer.masterLevel, voices: this.mixer.voiceCount });
     }
   }
