@@ -36,6 +36,59 @@ const browser = await chromium.launch({
   executablePath,
   args: ['--autoplay-policy=no-user-gesture-required', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
+// A WebGL canvas without preserveDrawingBuffer reads back blank, so judge what
+// the compositor actually shows: screenshot with the interface hidden.
+async function litShot(page, path) {
+  await page.evaluate(() => document.getElementById('app')?.style.setProperty('visibility', 'hidden'));
+  const png = await page.screenshot({ type: 'png', path });
+  await page.evaluate(() => document.getElementById('app')?.style.removeProperty('visibility'));
+  return page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${b64}`;
+    await img.decode();
+    const tmp = document.createElement('canvas');
+    tmp.width = 64;
+    tmp.height = 36;
+    const ctx = tmp.getContext('2d');
+    ctx.drawImage(img, 0, 0, 64, 36);
+    const d = ctx.getImageData(0, 0, 64, 36).data;
+    let lit = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 30) lit++;
+    return lit > 64 * 36 * 0.05;
+  }, png.toString('base64'));
+}
+
+/** Collects console errors, page errors and failed requests of one page. */
+function watchErrors(page) {
+  const errors = [];
+  page.on('console', (m) => m.type() === 'error' && errors.push(`${m.text()} ${m.location().url ?? ''}`.trim()));
+  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('response', (r) => r.status() >= 400 && errors.push(`HTTP ${r.status()} ${r.url()}`));
+  return errors;
+}
+
+/** Phone layout facts: the sheet, what is open, and whether anything leaves the screen or is too small to tap. */
+const phoneLayout = (page) =>
+  page.evaluate(() => {
+    const vw = innerWidth;
+    const vh = innerHeight;
+    const rect = (el) => el.getBoundingClientRect();
+    const inside = (r) => r.left >= -1 && r.top >= -1 && r.right <= vw + 1 && r.bottom <= vh + 1;
+    const dock = rect(document.querySelector('.pm-dock'));
+    const open = [...document.querySelectorAll('.pm-panel:not([hidden])')];
+    const targets = [...document.querySelectorAll('.pm-dock-actions button, .pm-panel:not([hidden]) button:not([hidden]), .pm-panel:not([hidden]) select')]
+      .filter((el) => el.offsetParent !== null);
+    const small = targets.filter((el) => Math.min(rect(el).width, rect(el).height) < 40).map((el) => el.getAttribute('aria-label') || el.textContent);
+    return {
+      sheet: document.querySelector('.pm-root')?.classList.contains('pm-sheet') ?? false,
+      open: open.map((p) => p.querySelector('.pm-panel-title')?.textContent),
+      overflowX: document.documentElement.scrollWidth > vw,
+      dockInside: inside(dock),
+      panelsInside: open.every((p) => inside(rect(p)) && rect(p).bottom <= dock.top + 1),
+      small,
+    };
+  });
+
 const failures = [];
 const check = (ok, what) => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${what}`);
@@ -43,10 +96,7 @@ const check = (ok, what) => {
 };
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  const consoleErrors = [];
-  page.on('console', (m) => m.type() === 'error' && consoleErrors.push(`${m.text()} ${m.location().url ?? ''}`.trim()));
-  page.on('pageerror', (e) => consoleErrors.push(String(e)));
-  page.on('response', (r) => r.status() >= 400 && consoleErrors.push(`HTTP ${r.status()} ${r.url()}`));
+  const consoleErrors = watchErrors(page);
   await page.goto(`http://127.0.0.1:${port}/`);
 
   const start = page.getByRole('button', { name: 'Start the music' });
@@ -68,27 +118,7 @@ try {
   const panels = await page.$$eval('.pm-panel:not([hidden]) .pm-panel-title', (els) => els.map((e) => e.textContent));
   check(panels.includes('Mood') && panels.includes('Music'), `default panels visible: ${panels.join(', ')}`);
 
-  // A WebGL canvas without preserveDrawingBuffer reads back blank, so judge what
-  // the compositor actually shows: screenshot with the interface hidden.
-  const visualsShot = async (path) => {
-    await page.evaluate(() => document.getElementById('app')?.style.setProperty('visibility', 'hidden'));
-    const png = await page.screenshot({ type: 'png', path });
-    await page.evaluate(() => document.getElementById('app')?.style.removeProperty('visibility'));
-    return page.evaluate(async (b64) => {
-      const img = new Image();
-      img.src = `data:image/png;base64,${b64}`;
-      await img.decode();
-      const tmp = document.createElement('canvas');
-      tmp.width = 64;
-      tmp.height = 36;
-      const ctx = tmp.getContext('2d');
-      ctx.drawImage(img, 0, 0, 64, 36);
-      const d = ctx.getImageData(0, 0, 64, 36).data;
-      let lit = 0;
-      for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 30) lit++;
-      return lit > 64 * 36 * 0.05;
-    }, png.toString('base64'));
-  };
+  const visualsShot = (path) => litShot(page, path);
   check(await visualsShot(), 'the visuals draw on the canvas');
 
   // every scene is selectable in the Visuals panel and draws (scene shots land next to the main screenshot)
@@ -138,6 +168,43 @@ try {
 
   await page.screenshot({ path: opt.screenshot });
   console.log(`      screenshot: ${opt.screenshot}`);
+  await page.close();
+
+  // a phone: touch, portrait then landscape (shots land next to the main screenshot)
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+  const phoneErrors = watchErrors(phone);
+  await phone.goto(`http://127.0.0.1:${port}/`);
+  check(!(await phone.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'phone: the start screen fits the width');
+  await phone.getByRole('button', { name: 'Start the music' }).tap();
+  await phone.waitForSelector('.pm-root', { timeout: 15000 });
+  await phone.waitForTimeout(3000);
+  let layout = await phoneLayout(phone);
+  check(layout.sheet, 'phone portrait: panels use the sheet layout');
+  check(layout.open.length === 1 && layout.open[0] === 'Mood', `phone portrait: one sheet open (${layout.open.join(', ')})`);
+  check(!layout.overflowX && layout.dockInside && layout.panelsInside, `phone portrait: everything on screen, sheet above the dock ${JSON.stringify(layout)}`);
+  check(layout.small.length === 0, `phone portrait: every tap target is at least 40 px ${JSON.stringify(layout.small)}`);
+  await phone.locator('.pm-dock').getByRole('button', { name: 'Band', exact: true }).tap();
+  layout = await phoneLayout(phone);
+  check(layout.open.length === 1 && layout.open[0] === 'Band', `phone: a dock tap switches the sheet (${layout.open.join(', ')})`);
+  await phone.getByRole('button', { name: 'Hide Band panel' }).tap();
+  check((await phoneLayout(phone)).open.length === 0, 'phone: the sheet closes, leaving the visuals');
+  await phone.locator('.pm-dock').getByRole('button', { name: 'Mood', exact: true }).tap();
+  const portraitShot = join(dirname(opt.screenshot), 'e2e-phone-portrait.png');
+  check(await litShot(phone), 'phone portrait: the visuals draw');
+  await phone.screenshot({ path: portraitShot });
+  console.log(`      screenshot: ${portraitShot}`);
+
+  await phone.setViewportSize({ width: 844, height: 390 });
+  await phone.waitForTimeout(1500);
+  layout = await phoneLayout(phone);
+  check(layout.sheet && layout.open[0] === 'Mood', `phone landscape: still one sheet (${layout.open.join(', ')})`);
+  check(!layout.overflowX && layout.dockInside && layout.panelsInside, `phone landscape: everything on screen, sheet above the dock ${JSON.stringify(layout)}`);
+  check(layout.small.length === 0, `phone landscape: every tap target is at least 40 px ${JSON.stringify(layout.small)}`);
+  const landscapeShot = join(dirname(opt.screenshot), 'e2e-phone-landscape.png');
+  await phone.screenshot({ path: landscapeShot });
+  console.log(`      screenshot: ${landscapeShot}`);
+  const phoneShown = await phone.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
+  check(phoneShown.length === 0 && phoneErrors.length === 0, `phone: no errors ${JSON.stringify([...phoneShown, ...phoneErrors].slice(0, 5))}`);
 } finally {
   await browser.close();
   server.close();

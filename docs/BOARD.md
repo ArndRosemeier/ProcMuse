@@ -5,7 +5,9 @@ The state of record; one screen, overwritten in place. Reconcile with `bash scri
 ```
 reconciled: SEE_GIT · 2026-10-15
 
-SESSION | id=claude-projects thread "tron world" | state=landed: Light cycles scene (ledger 11), e2e checks every scene (gate GREEN, e2e GREEN)
+SESSION | id=claude-projects thread "phone compatible" | state=landed: phone layout (ledger 13)
+
+LANDED | ledger=13 | phone layout: one sheet above a full-width dock, touch sizing, audio unlock on tap (gate GREEN, e2e GREEN incl. phone portrait+landscape)
 
 LANDED | ledger=12 | wow-factor instruments: horns, bells, organs, bagpipes, choir, taiko, gong (gate GREEN, e2e GREEN)
 

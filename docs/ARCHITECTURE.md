@@ -33,6 +33,8 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Rendering audio | `EngineCore.process` (live worklet AND offline) | `engine/core.ts` | engine tests |
 | "What is the music doing" for consumers | `MusicStateTracker` | `state/tracker.ts` | tracker tests |
 | Thread messages | `parseToProcessor` / `parseFromProcessor` | `packages/web/src/protocol.ts` | protocol tests |
+| Panel layout (floating windows vs. one sheet on phones) | `Workspace` picks the mode (`SHEET_QUERY`, or `layout` option) and owns the open sheet; `FloatingPanel.setLayout` applies it; CSS under `.pm-sheet` places it | `packages/ui/src/workspace.ts`, `panel.ts`, `styles.ts` | `ui.test: small screens show one panel at a time`, e2e: phone portrait/landscape |
+| Starting audio (gesture unlock, iOS silent switch, resume after interruption) | `WebEngine.create` (call it inside the tap) and its `wake` listener | `packages/web/src/webEngine.ts` | — (needs a real phone) |
 | Showing an error | `ErrorSurface.show` (one per workspace) | `packages/ui/src/errors.ts` | ui tests |
 | Building DOM | `h()` | `packages/ui/src/dom.ts` | — |
 | Hiding UI | the `hidden` attribute; ONE CSS rule `.pm-root [hidden]` honours it | `packages/ui/src/styles.ts` | e2e: default panels |
@@ -69,6 +71,8 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
   cap as a surface once `0.001 + k·t` exceeds it: ghost walls in the distance.
 - **Any 404 fails the e2e**, the browser's own `favicon.ico` request included, so the
   app declares an inline favicon in `apps/procmuse/index.html`.
+- **Touch sizing lives in ONE `@media (pointer: coarse)` block** in `styles.ts` (44 px targets, 16 px inputs so iOS does not zoom); the e2e fails any tap target under 40 px on the phone viewport.
+- **Hover styles sit behind `@media (hover: hover)`**, or they stick after a tap on phones.
 - **The app builds into repo-root `dist/`** with relative asset paths and ships
   `public/futuremagic.json`, matching how the owner's hub publishes apps.
 

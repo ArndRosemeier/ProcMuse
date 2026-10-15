@@ -47,9 +47,10 @@ const CSS = `
 .pm-panel {
   position: absolute;
   pointer-events: auto;
-  width: 21em;
+  width: var(--pm-panel-w, 21em);
   max-width: calc(100vw - 16px);
   max-height: calc(100vh - 90px);
+  max-height: calc(100dvh - 90px);
   display: flex;
   flex-direction: column;
   background: var(--pm-bg);
@@ -80,6 +81,7 @@ const CSS = `
 /* buttons */
 .pm-icon-btn, .pm-btn, .pm-dock-btn, .pm-reset, .pm-disclosure {
   font: inherit; color: var(--pm-text); cursor: pointer;
+  touch-action: manipulation;
   background: rgb(255 255 255 / 0.06);
   border: 1px solid var(--pm-border);
   border-radius: 999px;
@@ -87,7 +89,9 @@ const CSS = `
 .pm-icon-btn { min-width: 2.2em; min-height: 2.2em; display: inline-grid; place-items: center; padding: 0; }
 .pm-btn { padding: 0.5em 1.1em; min-height: 2.6em; font-weight: 600; }
 .pm-btn-primary { background: var(--pm-accent); color: #0b0716; border-color: transparent; }
-.pm-icon-btn:hover, .pm-btn:hover, .pm-dock-btn:hover, .pm-reset:hover, .pm-disclosure:hover { background: hsl(var(--pm-hue) 90% 60% / 0.28); }
+@media (hover: hover) {
+  .pm-icon-btn:hover, .pm-btn:hover, .pm-dock-btn:hover, .pm-reset:hover, .pm-disclosure:hover { background: hsl(var(--pm-hue) 90% 60% / 0.28); }
+}
 .pm-root :focus-visible, .pm-start :focus-visible {
   outline: 3px solid var(--pm-focus);
   outline-offset: 2px;
@@ -176,6 +180,54 @@ const CSS = `
 .pm-hidden-all .pm-dock { opacity: 0.35; background: transparent; border-color: transparent; }
 .pm-hidden-all .pm-dock:hover, .pm-hidden-all .pm-dock:focus-within { opacity: 1; }
 
+/* sheet layout (small screens): one panel docked above a full-width dock */
+.pm-sheet .pm-dock {
+  left: 0; right: 0; bottom: 0; transform: none; max-width: none;
+  flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0.3em;
+  border-radius: var(--pm-radius) var(--pm-radius) 0 0; border-bottom: 0;
+  padding: 0.4em max(0.4em, env(safe-area-inset-right)) max(0.4em, env(safe-area-inset-bottom)) max(0.4em, env(safe-area-inset-left));
+}
+.pm-sheet .pm-dock-actions { justify-content: center; }
+/* the panel row scrolls sideways instead of wrapping into a tall stack */
+.pm-sheet .pm-dock-panels { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.pm-sheet .pm-dock-panels::-webkit-scrollbar { display: none; }
+.pm-sheet .pm-dock-panels > .pm-dock-btn { flex: 0 0 auto; }
+.pm-sheet .pm-panel {
+  position: fixed; top: auto; left: max(0px, env(safe-area-inset-left)); right: max(0px, env(safe-area-inset-right));
+  bottom: var(--pm-dock-h, 6.5em);
+  width: auto; max-width: none;
+  max-height: min(58vh, calc(100vh - var(--pm-dock-h, 6.5em) - 12px));
+  max-height: min(58dvh, calc(100dvh - var(--pm-dock-h, 6.5em) - 12px));
+  border-bottom: 0; border-radius: var(--pm-radius) var(--pm-radius) 0 0;
+}
+.pm-sheet .pm-panel-header { cursor: default; }
+@media (orientation: landscape) {
+  /* short screen: the dock is one row and the sheet a side panel over the right of the visuals */
+  .pm-sheet .pm-dock { flex-direction: row; justify-content: flex-start; }
+  .pm-sheet .pm-dock-actions { flex-wrap: nowrap; flex: 0 0 auto; }
+  .pm-sheet .pm-dock-panels { flex: 1 1 auto; }
+  .pm-sheet .pm-panel {
+    left: auto; width: min(24em, 55vw);
+    max-height: calc(100vh - var(--pm-dock-h, 3.5em) - 12px - env(safe-area-inset-top));
+    max-height: calc(100dvh - var(--pm-dock-h, 3.5em) - 12px - env(safe-area-inset-top));
+  }
+}
+
+/* touch: fingers need bigger targets (44 px), and inputs under 16 px make iOS zoom the page */
+@media (pointer: coarse) {
+  .pm-icon-btn, .pm-dock-action { min-width: 2.9em; min-height: 2.9em; }
+  .pm-dock-btn, .pm-btn, .pm-disclosure { min-height: 2.9em; }
+  .pm-reset { width: 3.4em; height: 3.4em; } /* its font is 0.85em */
+  .pm-segment label { min-height: 2.9em; padding: 0.6em 0.9em; }
+  .pm-range { height: 2.9em; }
+  .pm-range::-webkit-slider-thumb { width: 1.8em; height: 1.8em; margin-top: -0.65em; }
+  .pm-range::-moz-range-thumb { width: 1.6em; height: 1.6em; }
+  .pm-switch { width: 3.8em; height: 2.2em; }
+  .pm-switch-knob { width: 1.7em; height: 1.7em; }
+  .pm-switch[aria-checked="true"] .pm-switch-knob { transform: translateX(1.6em); }
+  .pm-select, .pm-search { min-height: 2.9em; font-size: max(16px, 1em); }
+}
+
 /* errors */
 .pm-errors { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: min(40em, calc(100vw - 24px)); z-index: 1000; }
 .pm-error-list { list-style: none; margin: 0; padding: 0; }
@@ -201,9 +253,6 @@ const CSS = `
 .pm-still *, .pm-still *::before, .pm-still *::after { transition: none !important; animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .pm-root *, .pm-root *::before, .pm-root *::after { transition: none !important; animation: none !important; }
-}
-@media (max-width: 600px) {
-  .pm-panel { width: calc(100vw - 16px); }
 }
 `;
 

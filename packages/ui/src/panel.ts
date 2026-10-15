@@ -2,6 +2,11 @@
  * FloatingPanel: a translucent window over the visuals. Movable by pointer
  * (drag the header) AND by keyboard (focus the move handle, use the arrow
  * keys), collapsible, hideable, and remembered between sessions.
+ *
+ * On small screens the workspace switches to the `sheet` layout: the panel is
+ * then placed by CSS (one open sheet above the dock), its own position is kept
+ * untouched for the next time the screen is large, and the workspace decides
+ * which panel is open.
  */
 import { h, uid } from './dom.js';
 
@@ -24,12 +29,17 @@ export interface PanelOptions {
   hidden?: boolean;
 }
 
+/** `float`: freely placed windows. `sheet`: one panel at a time, docked by CSS (phones). */
+export type LayoutMode = 'float' | 'sheet';
+
 export interface PanelHost {
   bringToFront(panel: FloatingPanel): void;
   saveGeometry(panel: FloatingPanel): void;
   loadGeometry(id: string): PanelGeometry | null;
   announce(text: string): void;
   onVisibilityChange(panel: FloatingPanel): void;
+  /** sheet layout only: opens this panel as the sheet (closing the others), or closes it */
+  setSheet(panel: FloatingPanel, open: boolean): void;
 }
 
 const STEP = 16;
@@ -45,6 +55,8 @@ export class FloatingPanel {
   private readonly host: PanelHost;
   private readonly defaults: PanelGeometry;
   geometry: PanelGeometry;
+  private mode: LayoutMode = 'float';
+  private sheetOpen = false;
 
   constructor(host: PanelHost, options: PanelOptions) {
     this.host = host;
@@ -83,7 +95,8 @@ export class FloatingPanel {
     this.el = h('section', {
       class: 'pm-panel',
       attrs: { 'aria-labelledby': titleId, 'data-panel': options.id },
-      style: options.width ? { width: options.width } : {},
+      // a custom property, so the sheet layout's CSS can override the width
+      style: options.width ? { '--pm-panel-w': options.width } : {},
     }, header, this.body);
 
     this.collapseBtn.addEventListener('click', () => this.setCollapsed(!this.geometry.collapsed));
@@ -96,17 +109,27 @@ export class FloatingPanel {
 
   private apply(): void {
     const g = this.geometry;
-    this.el.style.left = `${g.x}px`;
-    this.el.style.top = `${g.y}px`;
-    this.el.hidden = g.hidden;
+    const float = this.mode === 'float';
+    this.el.style.left = float ? `${g.x}px` : '';
+    this.el.style.top = float ? `${g.y}px` : '';
+    this.el.hidden = this.hidden;
+    this.moveBtn.hidden = !float;
     this.body.hidden = g.collapsed;
     this.collapseBtn.setAttribute('aria-expanded', String(!g.collapsed));
     this.collapseBtn.setAttribute('aria-label', `${g.collapsed ? 'Expand' : 'Collapse'} ${this.title}`);
     this.collapseBtn.textContent = g.collapsed ? '▸' : '▾';
   }
 
-  /** Keeps at least the header on screen. */
+  /** Called by the workspace when the layout changes or another sheet opens. */
+  setLayout(mode: LayoutMode, sheetOpen: boolean): void {
+    this.mode = mode;
+    this.sheetOpen = sheetOpen;
+    this.apply();
+  }
+
+  /** Keeps at least the header on screen (float layout; a sheet is placed by CSS). */
   clamp(viewW: number, viewH: number): void {
+    if (this.mode !== 'float') return;
     const w = this.el.offsetWidth || 240;
     this.geometry.x = Math.round(Math.min(Math.max(this.geometry.x, -w + 80), Math.max(0, viewW - 80)));
     this.geometry.y = Math.round(Math.min(Math.max(this.geometry.y, 0), Math.max(0, viewH - 40)));
@@ -127,16 +150,25 @@ export class FloatingPanel {
   }
 
   setHidden(hidden: boolean): void {
-    this.geometry.hidden = hidden;
-    this.apply();
-    this.host.saveGeometry(this);
-    this.host.onVisibilityChange(this);
+    if (this.mode === 'sheet') {
+      this.host.setSheet(this, !hidden);
+    } else {
+      this.geometry.hidden = hidden;
+      this.apply();
+      this.host.saveGeometry(this);
+      this.host.onVisibilityChange(this);
+    }
     this.host.announce(`${this.title} panel ${hidden ? 'hidden' : 'shown'}`);
-    if (!hidden) this.moveBtn.focus();
+    if (!hidden) this.focus();
   }
 
   get hidden(): boolean {
-    return this.geometry.hidden;
+    return this.mode === 'sheet' ? !this.sheetOpen : this.geometry.hidden;
+  }
+
+  /** The panel's default visibility in the float layout (the workspace opens the first such panel as the sheet). */
+  get shownByDefault(): boolean {
+    return !this.defaults.hidden;
   }
 
   reset(): void {
@@ -146,7 +178,7 @@ export class FloatingPanel {
   }
 
   focus(): void {
-    this.moveBtn.focus();
+    (this.moveBtn.hidden ? this.collapseBtn : this.moveBtn).focus();
   }
 
   private onMoveKey(e: KeyboardEvent): void {
@@ -166,7 +198,7 @@ export class FloatingPanel {
 
   private onPointerDown(e: PointerEvent, header: HTMLElement): void {
     const target = e.target as HTMLElement;
-    if (e.button !== 0 || (target.closest('button') && !target.closest('.pm-move'))) return;
+    if (this.mode !== 'float' || e.button !== 0 || (target.closest('button') && !target.closest('.pm-move'))) return;
     e.preventDefault();
     const startX = e.clientX;
     const startY = e.clientY;

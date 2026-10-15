@@ -158,6 +158,37 @@ describe('workspace and panels', () => {
     expect(b.root.style.getPropertyValue('--pm-scale')).toBe('1.4');
   });
 
+  it('small screens show one panel at a time as a sheet, without touching the floating layout', () => {
+    const store = memoryStore();
+    const ws = new Workspace(document.body, { store, layout: 'sheet' });
+    const div = () => document.createElement('div');
+    const a = ws.addPanel({ id: 'a', title: 'A', content: div(), x: 10, y: 10 });
+    const b = ws.addPanel({ id: 'b', title: 'B', content: div(), x: 10, y: 10, hidden: true });
+    const c = ws.addPanel({ id: 'c', title: 'C', content: div(), x: 10, y: 10 });
+    const dockBtn = (t: string) => Array.from(ws.dock.querySelectorAll('button')).find((x) => x.textContent === t) as HTMLButtonElement;
+    expect(ws.root.classList.contains('pm-sheet')).toBe(true);
+    // the first panel shown by default opens; the sheet is placed by CSS, so nothing to drag
+    expect([a.el.hidden, b.el.hidden, c.el.hidden]).toEqual([false, true, true]);
+    expect((a.el.querySelector('.pm-move') as HTMLElement).hidden).toBe(true);
+    expect(a.el.style.left).toBe('');
+    dockBtn('B').click();
+    expect([a.el.hidden, b.el.hidden, c.el.hidden]).toEqual([true, false, true]);
+    expect([dockBtn('A'), dockBtn('B')].map((x) => x.getAttribute('aria-pressed'))).toEqual(['false', 'true']);
+    (b.el.querySelector('[aria-label="Hide B panel"]') as HTMLButtonElement).click();
+    expect([a, b, c].every((p) => p.el.hidden)).toBe(true);
+    // the choice persists, and the floating layout still has its own visibility
+    document.body.innerHTML = '';
+    const again = new Workspace(document.body, { store, layout: 'sheet' });
+    const a2 = again.addPanel({ id: 'a', title: 'A', content: div(), x: 10, y: 10 });
+    expect(a2.el.hidden).toBe(true);
+    again.setLayout('float');
+    expect(a2.el.hidden).toBe(false);
+    expect(a2.el.style.left).toBe('10px');
+    again.setLayout('sheet');
+    again.resetLayout();
+    expect(a2.el.hidden).toBe(false);
+  });
+
   it('shortcuts run, but never while typing, and keys are unique', () => {
     const ws = workspace();
     let n = 0;

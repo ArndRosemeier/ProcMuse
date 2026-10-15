@@ -40,6 +40,20 @@ export interface WebEngineEvents extends Record<string, unknown> {
   playing: boolean;
 }
 
+/** The events that count as a user gesture (HTML "activation-triggering"): a touch activates on release. */
+const WAKE_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'keydown'] as const;
+
+/**
+ * iOS plays Web Audio through the ringer channel, so the silent switch mutes
+ * it. Declaring the page a media player (Audio Session API, Safari 16.4+)
+ * makes it play like a video does. Optional enrichment: browsers without the
+ * API have no such switch to work around.
+ */
+function useMediaPlayback(): void {
+  const session = (globalThis.navigator as { audioSession?: { type: string } } | undefined)?.audioSession;
+  if (session) session.type = 'playback';
+}
+
 export class WebEngine implements ParamSource {
   readonly context: AudioContext;
   readonly node: AudioWorkletNode;
@@ -62,12 +76,33 @@ export class WebEngine implements ParamSource {
     node.connect(this.output);
     node.port.onmessage = (ev) => this.receive(ev.data);
     node.onprocessorerror = () => this.fail(new ProcMuseError('internal', 'the audio engine crashed'));
+    if (typeof document !== 'undefined') {
+      for (const type of WAKE_EVENTS) document.addEventListener(type, this.wake, true);
+    }
   }
 
+  /**
+   * Phones suspend (iOS: "interrupt") the context for calls, other apps or a
+   * locked screen, and only a gesture may restart it: the next tap or key
+   * press resumes it while the music is meant to play.
+   */
+  private readonly wake = () => {
+    if (!this._playing || this.disposed || this.context.state === 'running' || this.context.state === 'closed') return;
+    this.context.resume().catch((err: unknown) => this.fail(new ProcMuseError('internal', `audio could not resume: ${(err as Error).message}`)));
+  };
+
+  /**
+   * Call from a user gesture (a tap or click handler), before anything is
+   * awaited: browsers, iOS Safari most strictly, only let audio start inside
+   * the gesture, and the gesture is over at the first `await`.
+   */
   static async create(options: WebEngineOptions): Promise<WebEngine> {
     const context = options.context ?? new AudioContext({ latencyHint: 'playback' });
     if (!context.audioWorklet) throw new ProcMuseError('internal', 'AudioWorklet is not available in this browser');
-    await context.audioWorklet.addModule(options.processorUrl);
+    useMediaPlayback();
+    // unlock now, while the gesture lasts; play() resumes again (a no-op once running)
+    const unlocked = context.resume();
+    await Promise.all([context.audioWorklet.addModule(options.processorUrl), unlocked]);
     const store = new ParamStore(buildParamSpecs());
     if (options.params) store.apply(options.params);
     const processorOptions: ProcessorOptions = { params: store.snapshot() };
@@ -142,6 +177,9 @@ export class WebEngine implements ParamSource {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    if (typeof document !== 'undefined') {
+      for (const type of WAKE_EVENTS) document.removeEventListener(type, this.wake, true);
+    }
     this.node.port.onmessage = null;
     this.node.disconnect();
     this.output.disconnect();

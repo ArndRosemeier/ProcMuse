@@ -2,21 +2,31 @@
  * Workspace: the layer over the visuals. Owns the panels, the dock that
  * toggles them, UI preferences, shortcuts, announcements and the error
  * surface, and persists layout and preferences.
+ *
+ * Layout: on large screens panels float where the user puts them; on small
+ * screens (SHEET_QUERY: phones, portrait or landscape) they become ONE sheet
+ * above a full-width dock, and the dock buttons switch between them. Both
+ * layouts are remembered separately, so rotating a tablet keeps each intact.
  */
 import type { ParamStore, ParamValue } from '@procmuse/engine';
 import { Announcer } from './announcer.js';
 import { h } from './dom.js';
 import { ErrorSurface } from './errors.js';
-import { FloatingPanel, type PanelGeometry, type PanelHost, type PanelOptions } from './panel.js';
+import { FloatingPanel, type LayoutMode, type PanelGeometry, type PanelHost, type PanelOptions } from './panel.js';
 import { createUiSettings, UI } from './settings.js';
 import { Shortcuts } from './shortcuts.js';
 import { browserStore, type KeyValueStore } from './storage.js';
 import { installStyles } from './styles.js';
 
+/** Screens this small use the sheet layout. Landscape phones are short rather than narrow. */
+export const SHEET_QUERY = '(max-width: 640px), (max-height: 500px)';
+
 export interface WorkspaceOptions {
   store?: KeyValueStore;
   /** label for the main landmark */
   label?: string;
+  /** `auto` (default) follows SHEET_QUERY as the screen changes; a fixed mode pins it. */
+  layout?: LayoutMode | 'auto';
 }
 
 export interface DockAction {
@@ -45,6 +55,9 @@ export class Workspace implements PanelHost {
   private readonly actions: { action: DockAction; btn: HTMLButtonElement }[] = [];
   private z = 10;
   private hiddenAll = false;
+  private mode: LayoutMode = 'float';
+  /** the open sheet's panel id; '' = none open; null = never chosen (the first panel shown by default opens) */
+  private sheetId: string | null;
 
   constructor(host: HTMLElement, options: WorkspaceOptions = {}) {
     installStyles(host.ownerDocument);
@@ -73,6 +86,10 @@ export class Workspace implements PanelHost {
       this.shortcuts.dialog,
     );
     host.append(this.root);
+    this.sheetId = this.store.get('sheet-panel');
+    this.followLayout(options.layout ?? 'auto');
+    // the sheet sits on top of the dock, whose height depends on how its buttons wrap
+    new ResizeObserver(() => this.root.style.setProperty('--pm-dock-h', `${Math.ceil(this.dock.getBoundingClientRect().height)}px`)).observe(this.dock);
     this.settings.onParam((id, v) => this.applySetting(id, v));
     for (const s of this.settings.specs) this.applySetting(s.id, this.settings.get(s.id));
     this.shortcuts.attach(host.ownerDocument);
@@ -104,6 +121,46 @@ export class Workspace implements PanelHost {
     this.store.set('ui-settings', JSON.stringify(this.settings.snapshot()));
   }
 
+  private followLayout(layout: LayoutMode | 'auto'): void {
+    if (layout !== 'auto') {
+      this.setLayout(layout);
+      return;
+    }
+    const mq = matchMedia(SHEET_QUERY);
+    this.setLayout(mq.matches ? 'sheet' : 'float');
+    mq.addEventListener('change', (e) => this.setLayout(e.matches ? 'sheet' : 'float'));
+  }
+
+  /** The current layout: floating windows, or one sheet at a time. */
+  get layout(): LayoutMode {
+    return this.mode;
+  }
+
+  setLayout(mode: LayoutMode): void {
+    this.mode = mode;
+    this.root.classList.toggle('pm-sheet', mode === 'sheet');
+    this.applyLayout();
+  }
+
+  private openSheetId(): string {
+    return this.sheetId ?? this.panels.find((p) => p.shownByDefault)?.id ?? '';
+  }
+
+  private applyLayout(): void {
+    const open = this.openSheetId();
+    for (const p of this.panels) {
+      p.setLayout(this.mode, this.mode === 'sheet' && p.id === open);
+      this.onVisibilityChange(p);
+    }
+    if (this.mode === 'float') this.panels.forEach((p) => p.clamp(window.innerWidth, window.innerHeight));
+  }
+
+  setSheet(panel: FloatingPanel, open: boolean): void {
+    this.sheetId = open ? panel.id : '';
+    this.store.set('sheet-panel', this.sheetId);
+    this.applyLayout();
+  }
+
   addPanel(options: PanelOptions): FloatingPanel {
     const panel = new FloatingPanel(this, options);
     this.panels.push(panel);
@@ -116,6 +173,7 @@ export class Workspace implements PanelHost {
     });
     this.panelButtons.set(panel.id, btn);
     this.dock.querySelector('.pm-dock-panels')?.append(btn);
+    this.applyLayout();
     queueMicrotask(() => panel.clamp(window.innerWidth, window.innerHeight));
     return panel;
   }
@@ -189,6 +247,10 @@ export class Workspace implements PanelHost {
 
   resetLayout(): void {
     for (const p of this.panels) p.reset();
+    this.sheetId = null;
+    this.sheetId = this.openSheetId();
+    this.store.set('sheet-panel', this.sheetId);
+    this.applyLayout();
     this.announce('Panel layout reset');
   }
 
