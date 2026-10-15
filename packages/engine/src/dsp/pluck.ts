@@ -1,4 +1,5 @@
 /** Karplus-Strong plucked string with fractional delay, damping and brightness. */
+import { t60Gain } from '../core/math.js';
 import type { Noise } from './noise.js';
 
 export class Pluck {
@@ -18,8 +19,8 @@ export class Pluck {
   /** Excites the string. `decay` is roughly the T60 in seconds. */
   trigger(freq: number, sampleRate: number, decay: number, brightness: number, noise: Noise): void {
     this.delay = Math.min(this.buf.length - 2, Math.max(2, sampleRate / freq));
-    const periodsPerSecond = freq;
-    this.feedback = Math.pow(10, -3 / Math.max(0.05, decay * periodsPerSecond));
+    // one feedback pass per period; never shorter than 0.05 periods
+    this.feedback = t60Gain(Math.max(0.05 / freq, decay), freq);
     this.damping = brightness;
     const len = Math.ceil(this.delay);
     let lp = 0;

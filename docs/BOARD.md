@@ -7,7 +7,9 @@ reconciled: SEE_GIT · 2026-10-15
 
 SESSION | id=claude-projects thread "tron world" | state=landed: Light cycles scene (ledger 11), e2e checks every scene (gate GREEN, e2e GREEN)
 
-QUEUE | row=8 | listening pass on mix balance and patches (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
+LANDED | ledger=12 | wow-factor instruments: horns, bells, organs, bagpipes, choir, taiko, gong (gate GREEN, e2e GREEN)
+
+QUEUE | row=8 | listening pass on mix balance and patches, incl. the 16 new ones (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
 QUEUE | row=9 | sample-based instruments (piano, strings, voice) as an OscSpec type | src=ledger row 3
 QUEUE | row=10 | publish @procmuse/engine to npm (build dist, versioning) | src=README.md
 

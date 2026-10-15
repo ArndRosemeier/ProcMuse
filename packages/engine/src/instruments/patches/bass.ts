@@ -100,4 +100,23 @@ export const BASS_PATCHES: Patch[] = [
     amp: env(0.003, 0.25, 0.85, 0.07),
     level: 0.65,
   },
+  {
+    id: 'bass-didgeridoo',
+    name: 'Didgeridoo',
+    category: 'bass',
+    description: 'Droning wooden tube with a throaty, rhythmically breathing wah.',
+    poly: 1,
+    glide: 0.04,
+    oscillators: [
+      { type: 'wave', wave: 'saw', level: 0.7 },
+      { type: 'wave', wave: 'square', level: 0.4, pw: 0.2 },
+      { type: 'noise', level: 0.06, pink: true },
+    ],
+    filter: { mode: 'lowpass', cutoff: 320, resonance: 0.7, keyTrack: 0.3 },
+    formant: { peaks: [{ freq: 260, gain: 1 }, { freq: 1400, gain: 0.5 }, { freq: 2300, gain: 0.3 }], resonance: 0.7, dry: 0.3 },
+    lfo: { rate: 2.2, cutoff: 1.5, wave: 'triangle' },
+    amp: env(0.03, 0.3, 0.9, 0.15),
+    drive: 0.4,
+    level: 0.7,
+  },
 ];

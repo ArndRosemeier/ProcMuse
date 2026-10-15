@@ -27,6 +27,15 @@ export function panGains(pan: number): [number, number] {
   return [Math.cos(a), Math.sin(a)];
 }
 
+/**
+ * Per-step gain that falls 60 dB in `seconds` when applied `stepsPerSecond`
+ * times a second: THE decay-time formula (oscillator fades, plucked strings,
+ * reverb loops).
+ */
+export function t60Gain(seconds: number, stepsPerSecond: number): number {
+  return Math.pow(10, -3 / (seconds * stepsPerSecond));
+}
+
 /** Coefficient for a one-pole smoother reaching ~63% in `seconds`. */
 export function onePoleCoef(seconds: number, sampleRate: number): number {
   if (seconds <= 0) return 1;

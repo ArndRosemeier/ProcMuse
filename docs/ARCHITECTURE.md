@@ -24,6 +24,8 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Param → widget | `createControl(spec, source)` | `packages/ui/src/controls.ts` | `ui.test: every engine parameter becomes a named, described control` |
 | Many params → panel body | `createParamView` (groups, advanced disclosure, filter) | `packages/ui/src/paramView.ts` | ui tests |
 | A sound | a `Patch` (data) rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `pins: one voice architecture`, `pins: instruments are data` |
+| Decay time ("falls 60 dB in T seconds") | `t60Gain` | `packages/engine/src/core/math.ts` | `instruments.test: fades one oscillator on its own clock` |
+| An instrument's body (fixed resonant peaks) | `Patch.formant`, rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `instruments.test: formant peaks are unity gain` |
 | Polyphony/stealing | `Instrument` | `instruments/instrument.ts` | `instruments.test: steals voices` |
 | A genre | a `Style` (data) validated by `validateStyle` | `compose/style.ts`, `compose/styles/builtin.ts` | `pins: styles are data` |
 | Swing + humanize | `noteAt()` / `stepToBeat()` | `compose/rhythm.ts` | `pins: swing and humanize` |
@@ -55,6 +57,11 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 - **Package entry points use the `source` export condition** (Vite, Vitest and `tsc`
   are configured for it), so apps and tests run from TypeScript sources; `dist/` is
   for publishing.
+- **Two kinds of decay in a patch.** `amp` shapes the whole note; `OscBase.fade` lets one
+  oscillator die on its own (a bell's high partials, an organ's chiff) while the others
+  ring on. A patch has up to `MAX_OSCILLATORS` (6) oscillators.
+- **`pitchEnv.semitones` may be negative**: the note scoops up into pitch (horns,
+  conch); positive drops into it (drums).
 - **A WebGL canvas reads back blank** (no `preserveDrawingBuffer`, by design for speed):
   judge rendering from a page screenshot, as `scripts/e2e.mjs` does.
 - **Raymarch distance clamps must stay above the hit threshold.** A scene that caps

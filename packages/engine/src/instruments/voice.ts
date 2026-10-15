@@ -10,7 +10,7 @@ import { Noise } from '../dsp/noise.js';
 import { FmOperator, Oscillator } from '../dsp/osc.js';
 import { Pluck } from '../dsp/pluck.js';
 import { drive as applyDrive } from '../dsp/shape.js';
-import { TAU, clamp, panGains } from '../core/math.js';
+import { TAU, clamp, panGains, t60Gain } from '../core/math.js';
 import { midiToFreq } from '../theory/pitch.js';
 import type { OscSpec, Patch } from './patch.js';
 
@@ -35,7 +35,19 @@ interface OscRuntime {
   /** frequency multiplier from octave/semi/detune */
   mul: number;
   norm: number;
+  /** per-oscillator fade (OscBase.fade): current gain and per-sample multiplier; coef 1 = no fade */
+  fadeGain: number;
+  fadeCoef: number;
 }
+
+/** One fixed formant peak, per channel. */
+interface FormantRuntime {
+  l: Svf;
+  r: Svf;
+  /** peak gain, normalized so a gain of 1 is unity at the centre frequency */
+  gain: number;
+}
+
 
 export class Voice {
   readonly patch: Patch;
@@ -47,6 +59,8 @@ export class Voice {
   private filterR: Svf | null = null;
   private noise: Noise;
   private hasNoise = false;
+  private formants: FormantRuntime[] = [];
+  private formantDry = 0;
 
   /** MIDI note being played (after fixedNote), for voice allocation. */
   note = -1;
@@ -77,10 +91,35 @@ export class Voice {
       if (patch.filter.env) this.fenv.configure(patch.filter.env, sampleRate);
     }
     for (const spec of patch.oscillators) this.oscs.push(this.buildOsc(spec));
+    if (patch.formant) {
+      const { peaks, resonance, dry } = patch.formant;
+      // the SVF band-pass peaks at 1/k; scaling by k makes `gain` the peak gain
+      const k = 2 - 1.96 * resonance;
+      for (const pk of peaks) {
+        const l = new Svf('bandpass');
+        const r = new Svf('bandpass');
+        l.set(pk.freq, resonance, sampleRate);
+        r.set(pk.freq, resonance, sampleRate);
+        this.formants.push({ l, r, gain: pk.gain * k });
+      }
+      this.formantDry = dry ?? 0;
+    }
   }
 
   private buildOsc(spec: OscSpec): OscRuntime {
-    const rt: OscRuntime = { spec, waves: [], ratios: [], gl: [], gr: [], fm: null, pluck: null, mul: 1, norm: spec.level };
+    const rt: OscRuntime = {
+      spec,
+      waves: [],
+      ratios: [],
+      gl: [],
+      gr: [],
+      fm: null,
+      pluck: null,
+      mul: 1,
+      norm: spec.level,
+      fadeGain: 1,
+      fadeCoef: spec.fade === undefined ? 1 : t60Gain(spec.fade, this.sr),
+    };
     if (spec.type !== 'noise') {
       rt.mul = Math.pow(2, (spec.octave ?? 0) + (spec.semi ?? 0) / 12 + (spec.detune ?? 0) / 1200);
     }
@@ -139,6 +178,7 @@ export class Voice {
     this.fenv.gateOn();
     this.lfoAge = 0;
     for (const o of this.oscs) {
+      o.fadeGain = 1;
       if (o.fm && o.spec.type === 'fm') {
         this.fmIndexEnv = o.spec.indexEnv ?? 0;
         this.fmIndexCoef = Math.exp(-CONTROL_PERIOD / (Math.max(0.001, o.spec.indexDecay ?? 0.3) * this.sr));
@@ -163,6 +203,10 @@ export class Voice {
     this.fenv.reset();
     this.filterL?.reset();
     this.filterR?.reset();
+    for (const f of this.formants) {
+      f.l.reset();
+      f.r.reset();
+    }
     this.note = -1;
   }
 
@@ -215,6 +259,7 @@ export class Voice {
     const fl = this.filterL;
     const fr = this.filterR;
     const hasFilterEnv = !!p.filter?.env;
+    const formants = this.formants;
     for (let n = start; n < end; n++) {
       if (this.ctrl === 0) this.control(ctx);
       this.ctrl = (this.ctrl + 1) % CONTROL_PERIOD;
@@ -223,22 +268,24 @@ export class Voice {
       let l = 0;
       let r = 0;
       for (const o of this.oscs) {
+        const g = o.norm * o.fadeGain;
+        o.fadeGain *= o.fadeCoef;
         if (o.waves.length) {
           for (let i = 0; i < o.waves.length; i++) {
             const s = (o.waves[i] as Oscillator).next();
-            l += s * (o.gl[i] as number) * o.norm;
-            r += s * (o.gr[i] as number) * o.norm;
+            l += s * (o.gl[i] as number) * g;
+            r += s * (o.gr[i] as number) * g;
           }
         } else if (o.fm) {
-          const s = o.fm.next() * o.norm;
+          const s = o.fm.next() * g;
           l += s;
           r += s;
         } else if (o.pluck) {
-          const s = o.pluck.next() * o.norm;
+          const s = o.pluck.next() * g;
           l += s;
           r += s;
         } else if (this.hasNoise) {
-          const s = this.noise.next() * o.norm;
+          const s = this.noise.next() * g;
           l += s;
           r += s;
         }
@@ -246,6 +293,16 @@ export class Voice {
       if (fl && fr) {
         l = fl.process(l);
         r = fr.process(r);
+      }
+      if (formants.length) {
+        let fl2 = l * this.formantDry;
+        let fr2 = r * this.formantDry;
+        for (const f of formants) {
+          fl2 += f.l.process(l) * f.gain;
+          fr2 += f.r.process(r) * f.gain;
+        }
+        l = fl2;
+        r = fr2;
       }
       if (drv > 0) {
         l = applyDrive(l, drv);

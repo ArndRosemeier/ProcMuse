@@ -125,6 +125,17 @@ try {
   const after = await energy.getAttribute('aria-valuetext');
   check(before !== after, `energy slider responds to the keyboard (${before} → ${after})`);
 
+  // the Band panel lists every instrument a part can play, and switching one sounds without errors
+  await page.locator('.pm-dock').getByRole('button', { name: 'Band', exact: true }).click();
+  const lead = page.getByLabel('Lead instrument', { exact: true });
+  const leadOptions = await lead.locator('option').allTextContents();
+  check(['Bagpipe', 'Theremin', 'Tribal Horn', 'Tubular Bell', 'Rock Organ'].every((o) => leadOptions.includes(o)), `Band panel offers the new lead instruments (${leadOptions.length} options)`);
+  await lead.selectOption({ label: 'Bagpipe' });
+  await page.getByLabel('Texture instrument', { exact: true }).selectOption({ label: 'Bagpipe Drones' });
+  await page.waitForTimeout(1500);
+  const errorsAfterSwitch = await page.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
+  check(errorsAfterSwitch.length === 0 && consoleErrors.length === 0, `switching to the bagpipes raises no errors ${JSON.stringify([...errorsAfterSwitch, ...consoleErrors].slice(0, 5))}`);
+
   await page.screenshot({ path: opt.screenshot });
   console.log(`      screenshot: ${opt.screenshot}`);
 } finally {

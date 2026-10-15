@@ -20,7 +20,7 @@ export const PART_INFO: Record<PartId, PartInfo> = {
   perc: { label: 'Percussion', description: 'Toms, congas, blocks and bells for groove.', categories: ['perc'], ducked: false },
   bass: { label: 'Bass', description: 'The bass line.', categories: ['bass'], ducked: true },
   chords: { label: 'Chords', description: 'Rhythmic or sustained harmony.', categories: ['keys', 'pad', 'strings', 'brass', 'pluck'], ducked: true },
-  pad: { label: 'Pad', description: 'Long, soft background harmony.', categories: ['pad', 'strings', 'texture'], ducked: true },
+  pad: { label: 'Pad', description: 'Long, soft background harmony.', categories: ['pad', 'strings', 'keys', 'texture'], ducked: true },
   arp: { label: 'Arpeggio', description: 'Broken chords in fast patterns.', categories: ['pluck', 'bell', 'keys', 'lead'], ducked: true },
   lead: { label: 'Lead', description: 'The melody.', categories: ['lead', 'bell', 'brass', 'keys', 'pluck', 'strings'], ducked: false },
   texture: { label: 'Texture', description: 'Atmospheres, drones and risers.', categories: ['texture'], ducked: true },

@@ -1,4 +1,5 @@
 /** Send effects (delay, reverb, chorus). Each processes a stereo frame and returns WET output only. */
+import { t60Gain } from '../core/math.js';
 import { DelayLine } from './delayline.js';
 import { OnePole } from './filter.js';
 import { softClip } from './shape.js';
@@ -95,7 +96,7 @@ export class Reverb {
   /** size in [0, 1] → decay time ~0.4 s .. 9 s; damping in [0, 1] → brighter .. darker. */
   configure(size: number, damping: number): void {
     const t60 = 0.4 + size * size * 8.6;
-    this.gains = this.lengths.map((n) => Math.pow(10, (-3 * n) / (t60 * this.sr)));
+    this.gains = this.lengths.map((n) => t60Gain(t60, this.sr / n));
     const cutoff = 12000 - damping * 10500;
     for (const d of this.damp) d.setCutoff(cutoff, this.sr);
   }

@@ -43,6 +43,63 @@ describe('patch library', () => {
     expect(energy).toBeGreaterThan(0);
   });
 
+  it('fades one oscillator on its own clock (OscBase.fade)', () => {
+    const patch = validatePatch({
+      id: 't-fade',
+      name: 'fade',
+      category: 'bell',
+      description: '',
+      poly: 1,
+      oscillators: [{ type: 'wave', wave: 'sine', level: 1, fade: 0.1 }],
+      amp: { attack: 0.001, decay: 0.1, sustain: 1, release: 0.1 },
+      level: 1,
+    });
+    const inst = new Instrument(patch, SR, 1);
+    const l = new Float32Array(SR / 2);
+    const r = new Float32Array(SR / 2);
+    inst.noteOn(69, 1);
+    inst.render(l, r, 0, l.length, { sampleRate: SR, cutoffOctaves: 0 });
+    const peakIn = (a: number, b: number) => l.subarray(a, b).reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+    const early = peakIn(441, 882);
+    // 0.1 s T60: 60 dB down at 0.1 s, so by 0.2 s the sine is gone although the amp envelope holds
+    expect(peakIn(8820, 9261)).toBeLessThan(early * 0.001);
+  });
+
+  it('formant peaks are unity gain at their centre and do not follow the played pitch', () => {
+    const withPeak = (freq: number): Patch =>
+      validatePatch({
+        id: `t-formant-${freq}`,
+        name: 'formant',
+        category: 'lead',
+        description: '',
+        poly: 1,
+        oscillators: [{ type: 'wave', wave: 'sine', level: 1 }],
+        formant: { peaks: [{ freq, gain: 1 }], resonance: 0.8 },
+        amp: { attack: 0.001, decay: 0.1, sustain: 1, release: 0.1 },
+        level: 1,
+      });
+    const rms = (patch: Patch) => {
+      const inst = new Instrument(patch, SR, 1);
+      const l = new Float32Array(SR / 4);
+      const r = new Float32Array(SR / 4);
+      inst.noteOn(81, 1); // 880 Hz
+      inst.render(l, r, 0, l.length, { sampleRate: SR, cutoffOctaves: 0 });
+      let e = 0;
+      const from = Math.floor(l.length / 2);
+      for (let i = from; i < l.length; i++) e += (l[i] as number) ** 2;
+      return Math.sqrt(e / (l.length - from));
+    };
+    expect(rms(withPeak(880))).toBeCloseTo(Math.SQRT1_2, 1);
+    expect(rms(withPeak(220))).toBeLessThan(0.2);
+  });
+
+  it('rejects malformed formants and fades loudly', () => {
+    const base = BUILTIN_PATCHES[0] as Patch;
+    expect(() => validatePatch({ ...base, id: 'f0', formant: { peaks: [], resonance: 0.5 } })).toThrow(ProcMuseError);
+    expect(() => validatePatch({ ...base, id: 'f1', formant: { peaks: [{ freq: 5, gain: 1 }], resonance: 0.5 } })).toThrow(ProcMuseError);
+    expect(() => validatePatch({ ...base, id: 'f2', oscillators: [{ type: 'wave', wave: 'sine', level: 1, fade: 0 }] })).toThrow(ProcMuseError);
+  });
+
   it('rejects malformed patches loudly', () => {
     const broken = { ...(BUILTIN_PATCHES[0] as Patch), id: 'broken', oscillators: [] };
     expect(() => validatePatch(broken)).toThrow(ProcMuseError);

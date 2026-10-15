@@ -35,6 +35,12 @@ interface OscBase {
   semi?: number;
   /** cents */
   detune?: number;
+  /**
+   * Seconds for this oscillator alone to fade by 60 dB from the note start.
+   * Lets one patch hold partials that die at different rates (a bell's high
+   * partials go first, an organ's chiff is gone in a blink). Absent = no fade.
+   */
+  fade?: number;
 }
 
 export interface WaveOsc extends OscBase {
@@ -64,6 +70,8 @@ export interface NoiseOsc {
   type: 'noise';
   level: number;
   pink?: boolean;
+  /** as OscBase.fade: a breath, chiff or strike that dies away on its own */
+  fade?: number;
 }
 
 export interface PluckOsc extends OscBase {
@@ -89,6 +97,22 @@ export interface FilterSpec {
   /** octaves of extra cutoff at full velocity */
   velocity?: number;
 }
+
+/**
+ * Fixed resonant peaks after the main filter: the body of an instrument (a
+ * horn's bell, a chanter's nasal bore, a vowel). Unlike the main filter they
+ * do not follow the played pitch, which is what makes them sound like a body.
+ */
+export interface FormantSpec {
+  peaks: { freq: number; gain: number }[];
+  /** 0..1: sharpness of every peak */
+  resonance: number;
+  /** 0..: how much of the unfiltered signal passes beside the peaks */
+  dry?: number;
+}
+
+export const MAX_OSCILLATORS = 6;
+export const MAX_FORMANT_PEAKS = 4;
 
 export interface LfoSpec {
   /** Hz */
@@ -118,6 +142,8 @@ export interface Patch {
   oscillators: OscSpec[];
   amp: AdsrSpec;
   filter?: FilterSpec;
+  formant?: FormantSpec;
+  /** pitch offset at note start that decays to 0: positive drops (drums), negative scoops up (horns) */
   pitchEnv?: { semitones: number; decay: number };
   lfo?: LfoSpec;
   /** 0..1 saturation */
@@ -149,11 +175,12 @@ export function validatePatch(patch: Patch): Patch {
   if (!PATCH_CATEGORIES.includes(patch.category)) bad(patch, `unknown category ${String(patch.category)}`);
   finite(patch, 'poly', patch.poly, 1, 16);
   finite(patch, 'level', patch.level, 0, 4);
-  if (!Array.isArray(patch.oscillators) || patch.oscillators.length < 1 || patch.oscillators.length > 4) {
-    bad(patch, 'needs 1..4 oscillators');
+  if (!Array.isArray(patch.oscillators) || patch.oscillators.length < 1 || patch.oscillators.length > MAX_OSCILLATORS) {
+    bad(patch, `needs 1..${MAX_OSCILLATORS} oscillators`);
   }
   for (const [i, o] of patch.oscillators.entries()) {
     finite(patch, `osc${i}.level`, o.level, 0, 4);
+    if (o.fade !== undefined) finite(patch, `osc${i}.fade`, o.fade, 0.001, 60);
     if (o.type === 'wave') {
       if (!['sine', 'saw', 'square', 'triangle'].includes(o.wave)) bad(patch, `osc${i}.wave invalid`);
       if (o.unison !== undefined) finite(patch, `osc${i}.unison`, o.unison, 1, 7);
@@ -173,6 +200,22 @@ export function validatePatch(patch: Patch): Patch {
     finite(patch, 'filter.cutoff', patch.filter.cutoff, 10, 22000);
     finite(patch, 'filter.resonance', patch.filter.resonance, 0, 1);
     if (patch.filter.env) adsr(patch, 'filter.env', patch.filter.env);
+  }
+  if (patch.formant) {
+    const fm = patch.formant;
+    if (!Array.isArray(fm.peaks) || fm.peaks.length < 1 || fm.peaks.length > MAX_FORMANT_PEAKS) {
+      bad(patch, `formant needs 1..${MAX_FORMANT_PEAKS} peaks`);
+    }
+    for (const [i, pk] of fm.peaks.entries()) {
+      finite(patch, `formant.peak${i}.freq`, pk.freq, 20, 16000);
+      finite(patch, `formant.peak${i}.gain`, pk.gain, 0, 4);
+    }
+    finite(patch, 'formant.resonance', fm.resonance, 0, 0.98);
+    if (fm.dry !== undefined) finite(patch, 'formant.dry', fm.dry, 0, 2);
+  }
+  if (patch.pitchEnv) {
+    finite(patch, 'pitchEnv.semitones', patch.pitchEnv.semitones, -48, 48);
+    finite(patch, 'pitchEnv.decay', patch.pitchEnv.decay, 0, 10);
   }
   if (patch.drive !== undefined) finite(patch, 'drive', patch.drive, 0, 1);
   return patch;

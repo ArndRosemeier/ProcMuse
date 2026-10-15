@@ -191,4 +191,23 @@ export const DRUM_PATCHES: Patch[] = [
     amp: env(0.001, 0.25, 0, 0.06),
     level: 0.6,
   },
+  {
+    id: 'perc-taiko',
+    name: 'Taiko',
+    category: 'perc',
+    description: 'Huge Japanese war drum: a deep boom with the slap of the stick on skin.',
+    poly: 3,
+    fixedNote: 36,
+    oscillators: [
+      { type: 'wave', wave: 'sine', level: 1 },
+      { type: 'wave', wave: 'triangle', level: 0.25, octave: 1, fade: 0.1 },
+      { type: 'noise', level: 0.4, pink: true, fade: 0.05 },
+    ],
+    pitchEnv: { semitones: 7, decay: 0.08 },
+    filter: { mode: 'lowpass', cutoff: 2500, resonance: 0.1 },
+    amp: env(0.001, 1.2, 0, 0.3),
+    drive: 0.3,
+    level: 0.56,
+    velocity: 0.5,
+  },
 ];
