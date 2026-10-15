@@ -3,9 +3,9 @@
 The state of record; one screen, overwritten in place. Reconcile with `bash scripts/board.sh`.
 
 ```
-reconciled: SEE_GIT · 2026-10-14
+reconciled: SEE_GIT · 2026-10-15
 
-SESSION | id=claude-projects thread "procmuse" | state=landed: web host, ui, visuals, app (gate GREEN, e2e GREEN)
+SESSION | id=claude-projects thread "tron world" | state=landed: Light cycles scene (ledger 11), e2e checks every scene (gate GREEN, e2e GREEN)
 
 QUEUE | row=8 | listening pass on mix balance and patches (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
 QUEUE | row=9 | sample-based instruments (piano, strings, voice) as an OscSpec type | src=ledger row 3

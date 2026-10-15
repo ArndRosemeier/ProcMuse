@@ -38,6 +38,7 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Music → visual drivers | `mapping.ts` (MusicState → uniforms inputs) | `packages/visuals/src/mapping.ts` | visuals tests |
 | Flash limiting | `flash.ts` (always on; flashes default off) | `packages/visuals/src/flash.ts` | visuals tests |
 | Scene choice/crossfade | `director.ts` | `packages/visuals/src/director.ts` | visuals tests |
+| A visual scene | a `SceneDef` file in `scenes/`, listed ONCE in `SCENES`; the Scene picker, Automatic rotation, compilation and the e2e scene loop all follow from that list | `packages/visuals/src/scenes/registry.ts` | `glsl.test`, e2e: every scene draws |
 | Shared GLSL | the prelude, prepended to every scene | `packages/visuals/src/glsl/prelude.ts` | — |
 | Browser smoke | `npm run e2e` (build, serve dist, headless Chromium) | `scripts/e2e.mjs` | — |
 
@@ -56,6 +57,11 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
   for publishing.
 - **A WebGL canvas reads back blank** (no `preserveDrawingBuffer`, by design for speed):
   judge rendering from a page screenshot, as `scripts/e2e.mjs` does.
+- **Raymarch distance clamps must stay above the hit threshold.** A scene that caps
+  its distance (e.g. at a domain-repetition cell border, `scenes/tron.ts`) reads the
+  cap as a surface once `0.001 + k·t` exceeds it: ghost walls in the distance.
+- **Any 404 fails the e2e**, the browser's own `favicon.ico` request included, so the
+  app declares an inline favicon in `apps/procmuse/index.html`.
 - **The app builds into repo-root `dist/`** with relative asset paths and ships
   `public/futuremagic.json`, matching how the owner's hub publishes apps.
 

@@ -23,10 +23,11 @@
 | Output never clips | `engine.test > renders finite audio that never exceeds full scale` | engine tests | bypass the limiter |
 | Every param is an accessible control | `ui.test > every engine parameter becomes a named, described control` | `packages/ui/test/ui.test.ts` | drop the label `for` |
 
-| The app starts, plays, draws and answers the keyboard | `npm run e2e` | `scripts/e2e.mjs` | drop `.pm-root [hidden]` (hidden panels show) |
+| The app starts, plays, draws and answers the keyboard; every scene is selectable in the Visuals panel and draws; no HTTP error | `npm run e2e` | `scripts/e2e.mjs` | drop `.pm-root [hidden]` (hidden panels show); remove the favicon link (404 → RED, watched 2026-10-15) |
 
 ## Per landing
 
 Recorded in commit messages and the board.
 
 - 2026-10-14 · web host, UI, visuals and app: `npm test` 151 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (11 checks).
+- 2026-10-15 · Light cycles scene: `npm test` 152 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (18 checks, every scene draws).
