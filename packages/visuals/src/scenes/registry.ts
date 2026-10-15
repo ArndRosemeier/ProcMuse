@@ -3,11 +3,12 @@ import { PRELUDE, SCENE_MAIN } from '../glsl/prelude.js';
 import { grid } from './grid.js';
 import { kaleido } from './kaleido.js';
 import { nebula } from './nebula.js';
+import { ride } from './ride.js';
 import { tron } from './tron.js';
 import { tunnel } from './tunnel.js';
 import type { SceneDef } from './types.js';
 
-export const SCENES = [tunnel, grid, nebula, kaleido, tron] as const satisfies readonly SceneDef[];
+export const SCENES = [tunnel, grid, nebula, kaleido, tron, ride] as const satisfies readonly SceneDef[];
 export type SceneId = (typeof SCENES)[number]['id'];
 export const SCENE_IDS: readonly SceneId[] = SCENES.map((s) => s.id);
 

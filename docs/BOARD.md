@@ -5,7 +5,9 @@ The state of record; one screen, overwritten in place. Reconcile with `bash scri
 ```
 reconciled: SEE_GIT · 2026-10-15
 
-SESSION | id=claude-projects thread "phone compatible" | state=landed: phone layout (ledger 13)
+SESSION | id=claude-projects thread "motorbike visualization" | state=landed: Dusk ride scene (ledger 14)
+
+LANDED | ledger=14 | Dusk ride scene: fast motorbike ride, wireframe mountains and palms, mirror road (gate GREEN, e2e GREEN)
 
 LANDED | ledger=13 | phone layout: one sheet above a full-width dock, touch sizing, audio unlock on tap (gate GREEN, e2e GREEN incl. phone portrait+landscape)
 

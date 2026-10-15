@@ -33,3 +33,4 @@ Recorded in commit messages and the board.
 - 2026-10-14 · web host, UI, visuals and app: `npm test` 151 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (11 checks).
 - 2026-10-15 · Light cycles scene: `npm test` 152 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (18 checks, every scene draws).
 - 2026-10-15 · wow-factor instruments (ledger 12): `npm test` 171 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (20 checks, incl. the Band panel offering and playing the bagpipes).
+- 2026-10-15 · Dusk ride scene (ledger 14): `npm test` 173 vitest + 45 tools tests green; gate GREEN (both tiers); e2e GREEN (33 checks, every scene draws, phone portrait+landscape). The director test now derives its rotation from the scene count (it hard-coded four sections and broke at six scenes).

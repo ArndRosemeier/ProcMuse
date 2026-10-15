@@ -7,8 +7,11 @@ describe('scene director', () => {
   it('auto: tunnel first and on drops, other sections rotate through the rest', () => {
     expect(resolveScene('auto', { kind: 'intro', index: 0 })).toBe('tunnel');
     expect(resolveScene('auto', { kind: 'drop', index: 5 })).toBe('tunnel');
-    const others = new Set([1, 2, 3, 4].map((index) => resolveScene('auto', { kind: 'groove', index })));
+    // one rotation visits every other scene exactly once, whatever the scene count
+    const indices = Array.from({ length: SCENE_IDS.length - 1 }, (_, i) => i + 1);
+    const others = new Set(indices.map((index) => resolveScene('auto', { kind: 'groove', index })));
     expect(others.size).toBe(SCENE_IDS.length - 1);
+    expect(others.has('tunnel')).toBe(false);
     expect(resolveScene('grid', { kind: 'drop', index: 5 })).toBe('grid');
   });
 
