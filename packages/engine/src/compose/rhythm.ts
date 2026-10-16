@@ -34,10 +34,3 @@ export function accent(step: number): number {
   return step % 4 === 0 ? 1 : step % 2 === 0 ? 0.82 : 0.66;
 }
 
-/** Folds a MIDI note into [low, high] by octaves. */
-export function foldInto(pitch: number, low: number, high: number): number {
-  let p = pitch;
-  while (p < low) p += 12;
-  while (p > high) p -= 12;
-  return p;
-}

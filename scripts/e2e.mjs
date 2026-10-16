@@ -18,7 +18,7 @@ for (let i = 0; i < args.length; i++) {
 }
 if (!existsSync(join(DIST, 'index.html'))) throw new Error('dist/index.html missing: run npm run build first');
 
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.flac': 'audio/flac' };
 const server = createServer((req, res) => {
   const url = decodeURIComponent((req.url ?? '/').split('?')[0]);
   const path = normalize(join(DIST, url === '/' ? 'index.html' : url));
@@ -177,6 +177,28 @@ try {
   await page.waitForTimeout(1500);
   const errorsAfterSwitch = await page.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
   check(errorsAfterSwitch.length === 0 && consoleErrors.length === 0, `switching to the bagpipes raises no errors ${JSON.stringify([...errorsAfterSwitch, ...consoleErrors].slice(0, 5))}`);
+
+  // a recorded collection downloads with one press, decodes in the browser and plays
+  await page.locator('.pm-dock').getByRole('button', { name: 'Instruments', exact: true }).click();
+  const percussion = page.locator('.pm-collection', { hasText: 'Orchestral Percussion' }).getByRole('button');
+  await page.waitForFunction(() => /MB/.test(document.querySelector('.pm-collections')?.textContent ?? ''), null, { timeout: 15000 });
+  const offer = await percussion.textContent();
+  check(/^Download · [\d.]+ MB$/.test(offer ?? ''), `a collection offers its download size (${offer})`);
+  await percussion.click();
+  await page.waitForFunction(
+    () => {
+      const row = [...document.querySelectorAll('.pm-collection')].find((r) => r.textContent?.includes('Orchestral Percussion'));
+      const b = row?.querySelector('button');
+      return b?.textContent === 'Playing' && b.getAttribute('aria-pressed') === 'true';
+    },
+    null,
+    { timeout: 60000 },
+  );
+  const castText = await page.locator('.pm-cast').textContent();
+  check(/^Recorded now: .+/.test(castText ?? ''), `the collection plays after one press: ${castText}`);
+  await page.waitForTimeout(2000);
+  const errorsAfterCollection = await page.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
+  check(errorsAfterCollection.length === 0 && consoleErrors.length === 0, `recorded instruments play without errors ${JSON.stringify([...errorsAfterCollection, ...consoleErrors].slice(0, 5))}`);
 
   await page.screenshot({ path: opt.screenshot });
   console.log(`      screenshot: ${opt.screenshot}`);

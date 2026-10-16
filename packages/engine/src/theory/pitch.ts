@@ -14,3 +14,11 @@ export function noteName(midi: number): string {
   const m = Math.round(midi);
   return `${PITCH_CLASS_NAMES[pitchClass(m)]}${Math.floor(m / 12) - 1}`;
 }
+
+/** Folds a MIDI note into [low, high] by octaves. */
+export function foldInto(pitch: number, low: number, high: number): number {
+  let p = pitch;
+  while (p < low) p += 12;
+  while (p > high) p -= 12;
+  return p;
+}

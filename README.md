@@ -14,3 +14,12 @@ npm install
 npm test            # engine tests, architecture pins, toolbox self-tests
 npm run render -- --style techno --seconds 60 --out renders/techno.wav
 ```
+
+## Recorded instruments
+
+Six optional instrument collections (orchestral strings, brass, woodwinds, keys and
+mallets, percussion, and a broad mix) come from
+[VS Chamber Orchestra: Community Edition](https://github.com/sgossner/VSCO-2-CE)
+(CC0, recorded by Sam Gossner, Simon Dalzell and others; Versilian Studios). They are
+processed by `scripts/samples/build.mjs` into `apps/procmuse/public/samples/` and
+downloaded by the app only when a listener picks a collection.

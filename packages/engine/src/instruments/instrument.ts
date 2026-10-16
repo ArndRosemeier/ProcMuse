@@ -1,5 +1,6 @@
 /** An Instrument is a voice pool playing one Patch: allocation, stealing, mono legato. */
 import type { Patch } from './patch.js';
+import type { SampleBank } from './samples.js';
 import { Voice, type VoiceContext } from './voice.js';
 
 export class Instrument {
@@ -8,9 +9,9 @@ export class Instrument {
   private stamp = 0;
   private held: number[] = [];
 
-  constructor(patch: Patch, sampleRate: number, seed: number) {
+  constructor(patch: Patch, sampleRate: number, seed: number, samples: SampleBank | null = null) {
     this.patch = patch;
-    for (let i = 0; i < patch.poly; i++) this.voices.push(new Voice(patch, sampleRate, (seed + i * 7919) >>> 0));
+    for (let i = 0; i < patch.poly; i++) this.voices.push(new Voice(patch, sampleRate, (seed + i * 7919) >>> 0, samples));
   }
 
   noteOn(midi: number, velocity: number): void {

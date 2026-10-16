@@ -1,7 +1,8 @@
 /** Lead melody (motif development) and texture (drones and risers). */
 import { Rng } from '../../core/rng.js';
 import { chordTonesInRange } from '../../theory/chord.js';
-import { foldInto, noteAt } from '../rhythm.js';
+import { foldInto } from '../../theory/pitch.js';
+import { noteAt } from '../rhythm.js';
 import type { BarContext, Motif, NoteEvent, PartMemory } from '../types.js';
 
 /** Creates a two-bar motif: rhythm (onsets in 16ths) plus a scale-step contour. */

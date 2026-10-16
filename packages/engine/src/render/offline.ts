@@ -1,11 +1,14 @@
 /** Offline rendering: the same EngineCore, pulled as fast as the CPU allows. */
 import { EngineCore } from '../engine/core.js';
 import type { EngineEvent } from '../engine/events.js';
+import type { SampleSet } from '../instruments/samples.js';
 
 export interface OfflineOptions {
   seconds: number;
   sampleRate?: number;
   params?: Readonly<Record<string, unknown>>;
+  /** recorded instruments, needed when params choose a collection */
+  samples?: readonly SampleSet[];
   /** collect emitted events (default true) */
   collectEvents?: boolean;
 }
@@ -19,7 +22,7 @@ export interface OfflineResult {
 
 export function renderOffline(options: OfflineOptions): OfflineResult {
   const sampleRate = options.sampleRate ?? 44100;
-  const core = new EngineCore({ sampleRate, params: options.params });
+  const core = new EngineCore({ sampleRate, params: options.params, samples: options.samples });
   const events: EngineEvent[] = [];
   if (options.collectEvents !== false) core.setListener((e) => events.push(e));
   const frames = Math.ceil(options.seconds * sampleRate);

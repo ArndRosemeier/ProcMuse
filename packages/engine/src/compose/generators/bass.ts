@@ -1,6 +1,7 @@
 /** Bass generator: one algorithm with pattern families chosen per section. */
 import { Rng } from '../../core/rng.js';
-import { foldInto, noteAt } from '../rhythm.js';
+import { foldInto } from '../../theory/pitch.js';
+import { noteAt } from '../rhythm.js';
 import type { BassPattern } from '../style.js';
 import type { BarContext, NoteEvent, PartMemory } from '../types.js';
 

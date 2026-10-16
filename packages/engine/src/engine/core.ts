@@ -5,6 +5,7 @@
  * and `renderOffline` calls the same `process` for files and tests. It has no
  * dependency on Web Audio, the DOM, or timers.
  */
+import { castBand, requireCollectionSamples } from '../compose/collection.js';
 import { Composer, type ComposerInputs, type PartMode } from '../compose/composer.js';
 import { PART_IDS, PART_INDEX, partRecord, type PartId } from '../compose/parts.js';
 import { getStyle } from '../compose/styles.js';
@@ -14,6 +15,7 @@ import { ProcMuseError } from '../core/errors.js';
 import { hash32 } from '../core/rng.js';
 import { ParamStore, type ParamValue, type ParamValues } from '../core/params.js';
 import { getPatch } from '../instruments/registry.js';
+import { SampleBank, type SampleSet } from '../instruments/samples.js';
 import { MAX_BLOCK, Mixer, type MixSettings } from '../mix/mixer.js';
 import { PITCH_CLASS_NAMES } from '../theory/pitch.js';
 import { SCALE_LABELS, type ScaleName } from '../theory/scale.js';
@@ -31,6 +33,8 @@ export interface EngineCoreOptions {
   sampleRate: number;
   /** initial parameter values (validated) */
   params?: Readonly<Record<string, unknown>>;
+  /** recorded instruments, decoded by the host (see instruments/samples.ts) */
+  samples?: readonly SampleSet[];
 }
 
 const LEVELS_INTERVAL = 1 / 30;
@@ -55,6 +59,7 @@ export class EngineCore {
   private applyingStyle = false;
   /** true while the composer's own journey changes the style (it has already planned the new section) */
   private journeyMove = false;
+  private readonly samples = new SampleBank();
 
   constructor(options: EngineCoreOptions) {
     if (!(options.sampleRate >= 8000 && options.sampleRate <= 384000)) {
@@ -64,7 +69,9 @@ export class EngineCore {
     this.params = new ParamStore(buildParamSpecs());
     this.mixer = new Mixer(this.sampleRate);
     this.mix = { ...this.mixer.settings };
+    for (const set of options.samples ?? []) this.samples.add(set);
     if (options.params) {
+      this.requireSamplesFor(options.params);
       const style = options.params[P.style];
       if (style !== undefined) this.params.apply({ [P.style]: style, ...styleDefaults(String(style)) });
       this.params.apply(options.params);
@@ -85,8 +92,19 @@ export class EngineCore {
       journey: () => JOURNEY_BARS[params.string(P.journey) as JourneyPace],
     };
     this.composer = new Composer(params.number(P.seed), this.inputs);
-    PART_IDS.forEach((p, i) => this.loadInstrument(p, i));
+    this.castBand();
     params.onParam((id, value) => this.onParam(id, value));
+  }
+
+  /** Hands the engine decoded recordings. Validated; a collection can be chosen once all its sets are in. */
+  addSamples(set: SampleSet): void {
+    this.samples.add(set);
+  }
+
+  /** Refuses a collection whose recordings are not loaded, before any value changes. */
+  private requireSamplesFor(values: Readonly<Record<string, unknown>>): void {
+    const c = values[P.collection];
+    if (typeof c === 'string') requireCollectionSamples(c, (s) => this.samples.has(s));
   }
 
   /** Receives every event the engine emits. One listener (the host); fan-out is the host's job. */
@@ -104,10 +122,12 @@ export class EngineCore {
   }
 
   setParam(id: string, value: unknown): void {
+    this.requireSamplesFor({ [id]: value });
     this.params.set(id, value);
   }
 
   setParams(values: Readonly<Record<string, unknown>>): void {
+    this.requireSamplesFor(values);
     this.params.apply(values);
   }
 
@@ -154,9 +174,19 @@ export class EngineCore {
     return this.macros;
   }
 
-  private loadInstrument(part: PartId, index: number): void {
-    const id = this.params.string(P.part(part, 'instrument'));
-    this.mixer.setInstrument(index, getPatch(id), hash32(`${part}:${id}`, this.params.number(P.seed)));
+  /** Casts every part (synthesized or recorded, see compose/collection.ts) and loads what changed. */
+  private castBand(): void {
+    const p = this.params;
+    const band = castBand({
+      seed: p.number(P.seed),
+      collection: p.string(P.collection),
+      real: p.number(P.real),
+      synth: (part) => getPatch(p.string(P.part(part, 'instrument'))),
+    });
+    PART_IDS.forEach((part, i) => {
+      const id = band[part];
+      this.mixer.setInstrument(i, getPatch(id), hash32(`${part}:${id}`, p.number(P.seed)), this.samples);
+    });
   }
 
   private onParam(id: string, value: ParamValue): void {
@@ -179,9 +209,9 @@ export class EngineCore {
       }
     } else if (id === P.seed) {
       this.restartComposer();
-    } else if (id.endsWith('.instrument')) {
-      const part = id.split('.')[1] as PartId;
-      this.loadInstrument(part, PART_INDEX[part]);
+      this.castBand();
+    } else if (id.endsWith('.instrument') || id === P.collection || id === P.real) {
+      this.castBand();
     } else if (id.endsWith('.mode') && value === 'off') {
       const part = id.split('.')[1] as PartId;
       this.queue.filter((it) => !(it.part === PART_INDEX[part] && it.kind === ItemKind.On));

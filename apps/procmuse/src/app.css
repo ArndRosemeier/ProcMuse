@@ -86,3 +86,9 @@ html, body {
 .pm-actions { display: flex; flex-wrap: wrap; gap: 0.4em; margin: 0.2em 0 0.8em; }
 .pm-preset-row { display: flex; gap: 0.4em; align-items: end; margin-bottom: 0.6em; }
 .pm-preset-row > :first-child { flex: 1; }
+.pm-collections { list-style: none; margin: 0.6em 0 0.9em; padding: 0; display: grid; gap: 0.5em; }
+.pm-collection { display: flex; flex-wrap: wrap; gap: 0.35em 0.8em; align-items: center; }
+.pm-collection-text { display: grid; gap: 0.1em; flex: 1 1 16em; }
+.pm-collection .pm-progress { flex: 1 1 100%; }
+.pm-collection .pm-btn { white-space: nowrap; }
+.pm-cast { margin-top: 0.6em; }

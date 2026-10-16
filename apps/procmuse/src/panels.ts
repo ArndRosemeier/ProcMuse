@@ -2,6 +2,7 @@
 import type { ParamSpec } from '@procmuse/engine';
 import { createParamView, h, type KeyValueStore, type Workspace } from '@procmuse/ui';
 import type { WebEngine } from '@procmuse/web';
+import { instrumentsPanel, type Collections } from './instruments.js';
 import { NowPlaying } from './nowPlaying.js';
 import { PresetLibrary, applyPreset, capturePreset, encodePreset, type PresetTarget } from './presets.js';
 import type { VisualLayer } from './visualsLayer.js';
@@ -12,6 +13,7 @@ export interface PanelDeps {
   visuals: VisualLayer | null;
   targets: PresetTarget[];
   store: KeyValueStore;
+  collections: Collections;
 }
 
 export async function togglePlay(ws: Workspace, engine: WebEngine): Promise<void> {
@@ -27,7 +29,7 @@ function button(text: string, onClick: () => void, label?: string): HTMLButtonEl
 
 const inGroup = (...groups: string[]) => (s: ParamSpec) => groups.includes(s.group);
 
-export function buildPanels({ ws, engine, visuals, targets, store }: PanelDeps): { nowPlaying: NowPlaying } {
+export function buildPanels({ ws, engine, visuals, targets, store, collections }: PanelDeps): { nowPlaying: NowPlaying } {
   const W = window.innerWidth;
   const rightX = Math.max(16, W - 360);
   const errors = ws.errors;
@@ -84,6 +86,17 @@ export function buildPanels({ ws, engine, visuals, targets, store }: PanelDeps):
     }).el,
   });
 
+  // Instruments: recorded collections and how much of the band they play
+  ws.addPanel({
+    id: 'instruments',
+    title: 'Instruments',
+    // near the top: the list is tall, and a panel's height is capped at the window's
+    x: Math.max(16, rightX - 380),
+    y: 60,
+    hidden: true,
+    content: instrumentsPanel(ws, engine, collections),
+  });
+
   // Effects and master
   ws.addPanel({
     id: 'fx',
@@ -137,10 +150,17 @@ export function buildPanels({ ws, engine, visuals, targets, store }: PanelDeps):
       { class: 'pm-preset-row' },
       h('div', {}, h('label', { class: 'pm-label', text: 'Saved presets', attrs: { for: selectId } }), select),
       button('Load', safe('Load preset', () => {
-        const p = library.list()[select.value];
+        const name = select.value;
+        const p = library.list()[name];
         if (!p) throw new Error('choose a saved preset first');
-        applyPreset(targets, p);
-        ws.announce(`Loaded preset ${select.value}`);
+        // a preset may name an instrument collection: download it first, then apply
+        collections
+          .prepareFor(p)
+          .then(() => {
+            applyPreset(targets, p);
+            ws.announce(`Loaded preset ${name}`);
+          })
+          .catch((err: unknown) => errors.show(err, 'Load preset'));
       })),
     ),
     h(

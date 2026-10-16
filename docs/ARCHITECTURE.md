@@ -27,6 +27,13 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | A sound | a `Patch` (data) rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `pins: one voice architecture`, `pins: instruments are data` |
 | Decay time ("falls 60 dB in T seconds") | `t60Gain` | `packages/engine/src/core/math.ts` | `instruments.test: fades one oscillator on its own clock` |
 | An instrument's body (fixed resonant peaks) | `Patch.formant`, rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `instruments.test: formant peaks are unity gain` |
+| A recorded instrument | a `Patch` with a `sample` oscillator, rendered by the same `Voice` (`dsp/sampler.ts` plays a zone) | `instruments/patches/recorded.ts`, `dsp/sampler.ts` | `samples.test` |
+| Recordings into the engine | a validated `SampleSet` in the engine's `SampleBank` (`EngineCore.addSamples`, `WebEngine.addSamples`); the engine never fetches or decodes | `instruments/samples.ts` | `samples.test: is loud about missing…` |
+| Sample files → SampleSet | `parseSampleIndex` + `sampleSetFromPcm` (browser and Node share them) | `instruments/sampleIndex.ts` | `samples.test: the shipped sample files` |
+| Downloading and keeping recordings | `SampleLibrary` (fetch, Cache Storage, decode at the files' own rate) | `packages/web/src/sampleLibrary.ts` | e2e: a collection plays after one press |
+| Building the recordings | `scripts/samples/build.mjs` over a pinned VSCO-2-CE checkout (`sources.mjs`): trim, verify pitch, loop, level, FLAC | `scripts/samples/` | `samples.test: the shipped sample files` |
+| Which instrument plays each part | `castBand` (style's synth patch, or a collection's recorded one by the Real instruments amount) — the engine AND the app's panel call it | `compose/collection.ts` | `samples.test: collections and casting` |
+| A collection | `Collection` data validated by `validateCollection` | `compose/collections/builtin.ts` | `pins: instruments are data` |
 | Polyphony/stealing | `Instrument` | `instruments/instrument.ts` | `instruments.test: steals voices` |
 | A genre | a `Style` (data) validated by `validateStyle`, in a family file (`electronic.ts`, `chill.ts`, `world.ts`) listed once in `BUILTIN_STYLES`; the picker, shortcuts and the journey follow from `STYLES` | `compose/style.ts`, `compose/styles/` | `pins: styles are data`, `composer.test: style catalogue` (every patch is some style's default; every two styles differ in ≥ 3 parts) |
 | A shared song form or harmony table | `base.ts` (`DEFAULT_FORM`, `GROOVE_FORM`, `DRIFT_FORM`, `MINOR_POP`, `MAJOR_POP`, `MODAL`, `JAZZY`) | `compose/styles/base.ts` | — |
@@ -67,6 +74,17 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 - **Package entry points use the `source` export condition** (Vite, Vitest and `tsc`
   are configured for it), so apps and tests run from TypeScript sources; `dist/` is
   for publishing.
+- **A collection must be loaded before it is chosen.** `EngineCore.setParam` and
+  `WebEngine.set` refuse `instruments.collection` while a set is missing
+  (`requireCollectionSamples`), so the app downloads first (`apps/procmuse/src/instruments.ts`),
+  and a preset or share link that names a collection is prepared before it applies.
+- **Collections survive style changes**: `styleDefaults` never touches `instruments.*`.
+- **Recorded instruments are not in the Band menus** (`patchesIn` lists synthesized
+  patches only); the Band panel shows the style's synth choice, the Instruments panel
+  shows which parts are recorded right now.
+- **Rebuilding the recordings** needs ffmpeg and a VSCO-2-CE checkout at the commit
+  `scripts/samples/sources.mjs` pins: `node scripts/samples/build.mjs --vsco <path>`.
+  Files are named by content hash, so browsers never keep a stale one.
 - **Two kinds of decay in a patch.** `amp` shapes the whole note; `OscBase.fade` lets one
   oscillator die on its own (a bell's high partials, an organ's chiff) while the others
   ring on. A patch has up to `MAX_OSCILLATORS` (6) oscillators.
@@ -88,5 +106,7 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 
 - Mix balance and patch voicing were tuned by measurement, not by ear; they need a
   listening pass.
-- No sample-based instruments yet: the `OscSpec` union is where a `sample` type goes.
+- Recorded instruments use one velocity layer and mono files to keep downloads small
+  (17.6 MB for all 29); the zone format already carries velocity layers.
+- Recorded levels were matched by measurement against the synth patches, not by ear.
 - Meter is fixed at 4/4.

@@ -10,7 +10,12 @@ import {
   ParamStore,
   ProcMuseError,
   buildParamSpecs,
+  collectionSampleSets,
+  requireCollectionSamples,
+  validateSampleSet,
+  P,
   type EngineCommand,
+  type SampleSet,
   type EngineEvent,
   type MusicState,
   type ParamSource,
@@ -64,6 +69,8 @@ export class WebEngine implements ParamSource {
   private readonly tracker = new MusicStateTracker();
   private readonly emitter = new Emitter<WebEngineEvents>();
   private offset = 0;
+  /** ids of the sample sets handed to the audio thread */
+  private readonly sampleSets = new Set<string>();
   private _playing = false;
   private disposed = false;
 
@@ -133,14 +140,34 @@ export class WebEngine implements ParamSource {
     return this.store.snapshot();
   }
 
+  /**
+   * Hands decoded recordings (see SampleLibrary) to the audio thread. Validated
+   * here first; the arrays are transferred, so the caller must not reuse them.
+   */
+  addSamples(sets: readonly SampleSet[]): void {
+    for (const s of sets) validateSampleSet(s);
+    const buffers = new Set<ArrayBuffer>();
+    for (const s of sets) for (const z of s.zones) buffers.add(z.data.buffer as ArrayBuffer);
+    this.send({ type: 'samples', sets: [...sets] }, [...buffers]);
+    for (const s of sets) this.sampleSets.add(s.id);
+  }
+
+  /** True once every set the collection needs has been handed over. */
+  hasCollection(collection: string): boolean {
+    return collectionSampleSets(collection).every((s) => this.sampleSets.has(s));
+  }
+
   /** Validates locally (throws on bad input), then sends to the audio thread. */
   set(id: string, value: ParamValue): void {
+    if (id === P.collection) requireCollectionSamples(String(value), (s) => this.sampleSets.has(s));
     this.store.set(id, value);
     this.send({ type: 'set', id, value });
     this.emitter.emit('param', { id, value });
   }
 
   setMany(values: ParamValues): void {
+    const c = values[P.collection];
+    if (c !== undefined) requireCollectionSamples(String(c), (s) => this.sampleSets.has(s));
     this.store.apply(values);
     this.send({ type: 'setMany', values });
     for (const [id, value] of Object.entries(values)) this.emitter.emit('param', { id, value });
@@ -186,9 +213,9 @@ export class WebEngine implements ParamSource {
     this.emitter.clear();
   }
 
-  private send(msg: ToProcessor): void {
+  private send(msg: ToProcessor, transfer: Transferable[] = []): void {
     if (this.disposed) throw new ProcMuseError('internal', 'engine was disposed');
-    this.node.port.postMessage(msg);
+    this.node.port.postMessage(msg, transfer);
   }
 
   private fail(err: ProcMuseError): void {

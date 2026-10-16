@@ -11,6 +11,7 @@ import { Reverb, StereoDelay } from '../dsp/effects.js';
 import { DcBlocker } from '../dsp/filter.js';
 import { Instrument } from '../instruments/instrument.js';
 import type { Patch } from '../instruments/patch.js';
+import type { SampleBank } from '../instruments/samples.js';
 import type { VoiceContext } from '../instruments/voice.js';
 
 export const MAX_BLOCK = 512;
@@ -101,14 +102,15 @@ export class Mixer {
     this.voiceCtx = { sampleRate, cutoffOctaves: 0 };
   }
 
-  setInstrument(index: number, patch: Patch, seed: number): void {
+  setInstrument(index: number, patch: Patch, seed: number, samples: SampleBank | null = null): void {
     const ch = this.channels[index] as Channel;
     if (ch.instrument?.patch.id === patch.id) return;
+    const next = new Instrument(patch, this.sampleRate, seed, samples); // throws before anything changes
     if (ch.instrument) {
       ch.instrument.allOff();
       ch.retiring = ch.instrument;
     }
-    ch.instrument = new Instrument(patch, this.sampleRate, seed);
+    ch.instrument = next;
   }
 
   updateSettings(s: MixSettings): void {

@@ -4,15 +4,18 @@
  * Audio-rate work (oscillators, filter, envelopes) runs per sample; pitch,
  * cutoff and LFO are updated at control rate (every CONTROL_PERIOD samples).
  */
+import { ProcMuseError } from '../core/errors.js';
 import { Adsr } from '../dsp/envelope.js';
 import { Svf } from '../dsp/filter.js';
 import { Noise } from '../dsp/noise.js';
 import { FmOperator, Oscillator } from '../dsp/osc.js';
 import { Pluck } from '../dsp/pluck.js';
+import { SamplePlayer } from '../dsp/sampler.js';
 import { drive as applyDrive } from '../dsp/shape.js';
 import { TAU, clamp, panGains, t60Gain } from '../core/math.js';
-import { midiToFreq } from '../theory/pitch.js';
+import { foldInto, midiToFreq } from '../theory/pitch.js';
 import type { OscSpec, Patch } from './patch.js';
+import { pickZone, type SampleBank, type SampleSet } from './samples.js';
 
 export const CONTROL_PERIOD = 16;
 
@@ -32,6 +35,10 @@ interface OscRuntime {
   gr: number[];
   fm: FmOperator | null;
   pluck: Pluck | null;
+  sampler: SamplePlayer | null;
+  set: SampleSet | null;
+  /** sampler frames per output sample at 1 Hz, for the zone now playing */
+  zoneScale: number;
   /** frequency multiplier from octave/semi/detune */
   mul: number;
   norm: number;
@@ -80,7 +87,11 @@ export class Voice {
   private ctrl = 0;
   private lfoAmpGain = 1;
 
-  constructor(patch: Patch, sampleRate: number, seed: number) {
+  private readonly samples: SampleBank | null;
+
+  /** `samples` is required when the patch plays recordings; a missing set throws. */
+  constructor(patch: Patch, sampleRate: number, seed: number, samples: SampleBank | null = null) {
+    this.samples = samples;
     this.patch = patch;
     this.sr = sampleRate;
     this.noise = new Noise(seed);
@@ -115,6 +126,9 @@ export class Voice {
       gr: [],
       fm: null,
       pluck: null,
+      sampler: null,
+      set: null,
+      zoneScale: 0,
       mul: 1,
       norm: spec.level,
       fadeGain: 1,
@@ -143,6 +157,10 @@ export class Voice {
       rt.fm.feedback = spec.feedback ?? 0;
     } else if (spec.type === 'pluck') {
       rt.pluck = new Pluck(this.sr);
+    } else if (spec.type === 'sample') {
+      if (!this.samples) throw new ProcMuseError('missing-samples', `patch ${this.patch.id} plays recordings but no samples were given`);
+      rt.set = this.samples.get(spec.set);
+      rt.sampler = new SamplePlayer();
     } else {
       this.hasNoise = true;
       this.noise.pink = spec.pink ?? false;
@@ -160,7 +178,7 @@ export class Voice {
 
   noteOn(midi: number, velocity: number, stamp: number, legato: boolean): void {
     const p = this.patch;
-    const note = p.fixedNote ?? midi;
+    const note = p.fixedNote ?? (p.range ? foldInto(midi, p.range[0], p.range[1]) : midi);
     this.note = midi;
     this.started = stamp;
     this.velocity = velocity;
@@ -184,6 +202,11 @@ export class Voice {
         this.fmIndexCoef = Math.exp(-CONTROL_PERIOD / (Math.max(0.001, o.spec.indexDecay ?? 0.3) * this.sr));
         o.fm.phase = 0;
         o.fm.modPhase = 0;
+      }
+      if (o.sampler && o.set) {
+        const zone = pickZone(o.set, note + 12 * Math.log2(o.mul), velocity);
+        o.sampler.start(zone);
+        o.zoneScale = o.set.sampleRate / midiToFreq(zone.root) / this.sr;
       }
       if (o.pluck && o.spec.type === 'pluck') {
         o.pluck.trigger(midiToFreq(note) * o.mul, this.sr, o.spec.decay, clamp(o.spec.brightness * (0.6 + 0.4 * velocity), 0, 1), this.noise);
@@ -232,6 +255,7 @@ export class Voice {
     for (const o of this.oscs) {
       const base = inc * o.mul;
       for (let i = 0; i < o.waves.length; i++) (o.waves[i] as Oscillator).inc = base * (o.ratios[i] as number);
+      if (o.sampler) o.sampler.inc = freq * o.mul * o.zoneScale;
       if (o.fm && o.spec.type === 'fm') {
         o.fm.inc = base;
         o.fm.index = o.spec.index + this.fmIndexEnv;
@@ -278,6 +302,10 @@ export class Voice {
           }
         } else if (o.fm) {
           const s = o.fm.next() * g;
+          l += s;
+          r += s;
+        } else if (o.sampler) {
+          const s = o.sampler.next() * g;
           l += s;
           r += s;
         } else if (o.pluck) {

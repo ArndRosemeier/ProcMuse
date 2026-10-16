@@ -1,6 +1,7 @@
 /** Every engine parameter, declared once. The UI, presets and host apps all read this list. */
 import type { ParamSpec } from '../core/params.js';
 import { PART_IDS, PART_INFO, type PartId } from '../compose/parts.js';
+import { COLLECTIONS, NO_COLLECTION } from '../compose/collection.js';
 import { DEFAULT_STYLE_ID, STYLES, getStyle } from '../compose/styles.js';
 import { patchesIn } from '../instruments/registry.js';
 import { PITCH_CLASS_NAMES } from '../theory/pitch.js';
@@ -53,6 +54,8 @@ export const P = {
   delayFeedback: 'fx.delayFeedback',
   duck: 'fx.duck',
   volume: 'master.volume',
+  collection: 'instruments.collection',
+  real: 'instruments.real',
   part: (part: PartId, field: 'mode' | 'instrument' | 'level' | 'pan' | 'reverb' | 'delay') => `part.${part}.${field}`,
 } as const;
 
@@ -135,6 +138,25 @@ export function buildParamSpecs(): ParamSpec[] {
       options: [{ value: 'auto', label: 'Auto' }, ...SCALE_NAMES.map((n) => ({ value: n, label: SCALE_LABELS[n] }))],
       default: 'auto',
     },
+    {
+      kind: 'enum',
+      id: P.collection,
+      label: 'Instrument collection',
+      description: 'A set of recorded instruments that can take over parts of the band. Each collection is downloaded once before it plays.',
+      group: 'Instruments',
+      options: [
+        { value: NO_COLLECTION, label: 'Synthesized only', description: 'Every part plays a synthesized instrument.' },
+        ...COLLECTIONS.map((c) => ({ value: c.id, label: c.name, description: c.description })),
+      ],
+      default: NO_COLLECTION,
+    },
+    unit(
+      P.real,
+      'Real instruments',
+      'How many parts the recorded instruments of the collection play: none at 0%, every part they can at 100%. The rest stay synthesized.',
+      'Instruments',
+      0.5,
+    ),
     unit(P.energy, 'Energy', 'How intense the music is: more parts, louder sections, more drops.', 'Feel', 0.6),
     unit(P.complexity, 'Complexity', 'How busy and rich: denser rhythms, extended chords, longer arpeggios.', 'Feel', 0.5),
     unit(P.variation, 'Variation', 'How often new ideas replace familiar ones.', 'Feel', 0.4),

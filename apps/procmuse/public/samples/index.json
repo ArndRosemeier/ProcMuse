@@ -1,0 +1,1787 @@
+{
+ "version": 1,
+ "sampleRate": 32000,
+ "source": {
+  "name": "VS Chamber Orchestra: Community Edition",
+  "url": "https://github.com/sgossner/VSCO-2-CE",
+  "commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+  "license": "CC0 1.0 Universal (public domain)",
+  "credit": "Recorded by Sam Gossner, Simon Dalzell and others; Versilian Studios."
+ },
+ "sets": {
+  "vsco-piano": {
+   "file": "vsco-piano.d517e4f825.flac",
+   "bytes": 1328699,
+   "frames": 2467356,
+   "zones": [
+    {
+     "root": 21,
+     "start": 0,
+     "length": 112000
+    },
+    {
+     "root": 25,
+     "start": 112000,
+     "length": 112000
+    },
+    {
+     "root": 29,
+     "start": 224000,
+     "length": 112000
+    },
+    {
+     "root": 33,
+     "start": 336000,
+     "length": 112000
+    },
+    {
+     "root": 37,
+     "start": 448000,
+     "length": 112000
+    },
+    {
+     "root": 41,
+     "start": 560000,
+     "length": 112000
+    },
+    {
+     "root": 45,
+     "start": 672000,
+     "length": 112000
+    },
+    {
+     "root": 49,
+     "start": 784000,
+     "length": 112000
+    },
+    {
+     "root": 53,
+     "start": 896000,
+     "length": 112000
+    },
+    {
+     "root": 57,
+     "start": 1008000,
+     "length": 112000
+    },
+    {
+     "root": 61,
+     "start": 1120000,
+     "length": 112000
+    },
+    {
+     "root": 65,
+     "start": 1232000,
+     "length": 112000
+    },
+    {
+     "root": 69,
+     "start": 1344000,
+     "length": 112000
+    },
+    {
+     "root": 73,
+     "start": 1456000,
+     "length": 112000
+    },
+    {
+     "root": 77,
+     "start": 1568000,
+     "length": 112000
+    },
+    {
+     "root": 81,
+     "start": 1680000,
+     "length": 112000
+    },
+    {
+     "root": 85,
+     "start": 1792000,
+     "length": 112000
+    },
+    {
+     "root": 89,
+     "start": 1904000,
+     "length": 112000
+    },
+    {
+     "root": 93,
+     "start": 2016000,
+     "length": 112000
+    },
+    {
+     "root": 97,
+     "start": 2128000,
+     "length": 112000
+    },
+    {
+     "root": 101,
+     "start": 2240000,
+     "length": 80691
+    },
+    {
+     "root": 105,
+     "start": 2320691,
+     "length": 76469
+    },
+    {
+     "root": 109,
+     "start": 2397160,
+     "length": 70196
+    }
+   ]
+  },
+  "vsco-organ": {
+   "file": "vsco-organ.19b2b96e96.flac",
+   "bytes": 1596934,
+   "frames": 1596352,
+   "zones": [
+    {
+     "root": 36,
+     "start": 0,
+     "length": 82112,
+     "loopStart": 30454,
+     "loopEnd": 82112
+    },
+    {
+     "root": 39,
+     "start": 82112,
+     "length": 80192,
+     "loopStart": 37684,
+     "loopEnd": 80192
+    },
+    {
+     "root": 42,
+     "start": 162304,
+     "length": 79232,
+     "loopStart": 35843,
+     "loopEnd": 79232
+    },
+    {
+     "root": 45,
+     "start": 241536,
+     "length": 77632,
+     "loopStart": 34626,
+     "loopEnd": 77632
+    },
+    {
+     "root": 48,
+     "start": 319168,
+     "length": 80192,
+     "loopStart": 28589,
+     "loopEnd": 80192
+    },
+    {
+     "root": 51,
+     "start": 399360,
+     "length": 75712,
+     "loopStart": 23570,
+     "loopEnd": 75712
+    },
+    {
+     "root": 54,
+     "start": 475072,
+     "length": 66752,
+     "loopStart": 31909,
+     "loopEnd": 66752
+    },
+    {
+     "root": 57,
+     "start": 541824,
+     "length": 72192,
+     "loopStart": 20038,
+     "loopEnd": 72192
+    },
+    {
+     "root": 60,
+     "start": 614016,
+     "length": 68992,
+     "loopStart": 17110,
+     "loopEnd": 68992
+    },
+    {
+     "root": 63,
+     "start": 683008,
+     "length": 82432,
+     "loopStart": 47944,
+     "loopEnd": 82432
+    },
+    {
+     "root": 66,
+     "start": 765440,
+     "length": 66752,
+     "loopStart": 23404,
+     "loopEnd": 66752
+    },
+    {
+     "root": 69,
+     "start": 832192,
+     "length": 73472,
+     "loopStart": 21460,
+     "loopEnd": 73472
+    },
+    {
+     "root": 72,
+     "start": 905664,
+     "length": 82432,
+     "loopStart": 47946,
+     "loopEnd": 82432
+    },
+    {
+     "root": 75,
+     "start": 988096,
+     "length": 81792,
+     "loopStart": 29856,
+     "loopEnd": 81792
+    },
+    {
+     "root": 78,
+     "start": 1069888,
+     "length": 70592,
+     "loopStart": 35996,
+     "loopEnd": 70592
+    },
+    {
+     "root": 81,
+     "start": 1140480,
+     "length": 70272,
+     "loopStart": 18394,
+     "loopEnd": 70272
+    },
+    {
+     "root": 84,
+     "start": 1210752,
+     "length": 82432,
+     "loopStart": 47889,
+     "loopEnd": 82432
+    },
+    {
+     "root": 87,
+     "start": 1293184,
+     "length": 68032,
+     "loopStart": 16175,
+     "loopEnd": 68032
+    },
+    {
+     "root": 90,
+     "start": 1361216,
+     "length": 75392,
+     "loopStart": 23514,
+     "loopEnd": 75392
+    },
+    {
+     "root": 93,
+     "start": 1436608,
+     "length": 78912,
+     "loopStart": 27072,
+     "loopEnd": 78912
+    },
+    {
+     "root": 96,
+     "start": 1515520,
+     "length": 80832,
+     "loopStart": 46231,
+     "loopEnd": 80832
+    }
+   ]
+  },
+  "vsco-marimba": {
+   "file": "vsco-marimba.09e8988379.flac",
+   "bytes": 177363,
+   "frames": 459190,
+   "zones": [
+    {
+     "root": 41,
+     "start": 0,
+     "length": 51200
+    },
+    {
+     "root": 48,
+     "start": 51200,
+     "length": 51200
+    },
+    {
+     "root": 55,
+     "start": 102400,
+     "length": 51200
+    },
+    {
+     "root": 59,
+     "start": 153600,
+     "length": 51200
+    },
+    {
+     "root": 65,
+     "start": 204800,
+     "length": 51200
+    },
+    {
+     "root": 72,
+     "start": 256000,
+     "length": 51200
+    },
+    {
+     "root": 79,
+     "start": 307200,
+     "length": 38835
+    },
+    {
+     "root": 83,
+     "start": 346035,
+     "length": 35562
+    },
+    {
+     "root": 89,
+     "start": 381597,
+     "length": 40716
+    },
+    {
+     "root": 96,
+     "start": 422313,
+     "length": 36877
+    }
+   ]
+  },
+  "vsco-xylophone": {
+   "file": "vsco-xylophone.4d6b9316e4.flac",
+   "bytes": 112653,
+   "frames": 217912,
+   "zones": [
+    {
+     "root": 67,
+     "start": 0,
+     "length": 38400
+    },
+    {
+     "root": 72,
+     "start": 38400,
+     "length": 38400
+    },
+    {
+     "root": 79,
+     "start": 76800,
+     "length": 38400
+    },
+    {
+     "root": 84,
+     "start": 115200,
+     "length": 34841
+    },
+    {
+     "root": 91,
+     "start": 150041,
+     "length": 21618
+    },
+    {
+     "root": 96,
+     "start": 171659,
+     "length": 17834
+    },
+    {
+     "root": 103,
+     "start": 189493,
+     "length": 15458
+    },
+    {
+     "root": 108,
+     "start": 204951,
+     "length": 12961
+    }
+   ]
+  },
+  "vsco-glockenspiel": {
+   "file": "vsco-glockenspiel.a5b10ba0a1.flac",
+   "bytes": 281961,
+   "frames": 440942,
+   "zones": [
+    {
+     "root": 79,
+     "start": 0,
+     "length": 80000
+    },
+    {
+     "root": 84,
+     "start": 80000,
+     "length": 80000
+    },
+    {
+     "root": 91,
+     "start": 160000,
+     "length": 80000
+    },
+    {
+     "root": 96,
+     "start": 240000,
+     "length": 80000
+    },
+    {
+     "root": 103,
+     "start": 320000,
+     "length": 80000
+    },
+    {
+     "root": 108,
+     "start": 400000,
+     "length": 40942
+    }
+   ]
+  },
+  "vsco-timpani": {
+   "file": "vsco-timpani.372e6a2088.flac",
+   "bytes": 197892,
+   "frames": 400000,
+   "zones": [
+    {
+     "root": 30,
+     "start": 0,
+     "length": 80000
+    },
+    {
+     "root": 34,
+     "start": 80000,
+     "length": 80000
+    },
+    {
+     "root": 37,
+     "start": 160000,
+     "length": 80000
+    },
+    {
+     "root": 40,
+     "start": 240000,
+     "length": 80000
+    },
+    {
+     "root": 42,
+     "start": 320000,
+     "length": 80000
+    }
+   ]
+  },
+  "vsco-bass-drum": {
+   "file": "vsco-bass-drum.c7f7582ff1.flac",
+   "bytes": 33575,
+   "frames": 64000,
+   "zones": [
+    {
+     "root": 36,
+     "start": 0,
+     "length": 64000
+    }
+   ]
+  },
+  "vsco-snare": {
+   "file": "vsco-snare.e0e20e5097.flac",
+   "bytes": 26982,
+   "frames": 22508,
+   "zones": [
+    {
+     "root": 38,
+     "start": 0,
+     "length": 22508
+    }
+   ]
+  },
+  "vsco-shaker": {
+   "file": "vsco-shaker.5f5e25d864.flac",
+   "bytes": 18950,
+   "frames": 8118,
+   "zones": [
+    {
+     "root": 42,
+     "start": 0,
+     "length": 8118
+    }
+   ]
+  },
+  "vsco-big-drum": {
+   "file": "vsco-big-drum.dd8da5c2ff.flac",
+   "bytes": 23348,
+   "frames": 44200,
+   "zones": [
+    {
+     "root": 45,
+     "start": 0,
+     "length": 44200
+    }
+   ]
+  },
+  "vsco-claves": {
+   "file": "vsco-claves.a23c8cdba2.flac",
+   "bytes": 19120,
+   "frames": 12800,
+   "zones": [
+    {
+     "root": 75,
+     "start": 0,
+     "length": 12800
+    }
+   ]
+  },
+  "vsco-gong": {
+   "file": "vsco-gong.a0799da5eb.flac",
+   "bytes": 157297,
+   "frames": 224000,
+   "zones": [
+    {
+     "root": 48,
+     "start": 0,
+     "length": 224000
+    }
+   ]
+  },
+  "vsco-violins": {
+   "file": "vsco-violins.2654516f7f.flac",
+   "bytes": 1208623,
+   "frames": 985600,
+   "zones": [
+    {
+     "root": 55,
+     "start": 0,
+     "length": 92224,
+     "loopStart": 38729,
+     "loopEnd": 92224
+    },
+    {
+     "root": 59,
+     "start": 92224,
+     "length": 96064,
+     "loopStart": 51437,
+     "loopEnd": 96064
+    },
+    {
+     "root": 62,
+     "start": 188288,
+     "length": 94784,
+     "loopStart": 49803,
+     "loopEnd": 94784
+    },
+    {
+     "root": 66,
+     "start": 283072,
+     "length": 105664,
+     "loopStart": 69732,
+     "loopEnd": 105664
+    },
+    {
+     "root": 69,
+     "start": 388736,
+     "length": 102784,
+     "loopStart": 66810,
+     "loopEnd": 102784
+    },
+    {
+     "root": 72,
+     "start": 491520,
+     "length": 97984,
+     "loopStart": 62243,
+     "loopEnd": 97984
+    },
+    {
+     "root": 76,
+     "start": 589504,
+     "length": 96064,
+     "loopStart": 60171,
+     "loopEnd": 96064
+    },
+    {
+     "root": 79,
+     "start": 685568,
+     "length": 101184,
+     "loopStart": 56459,
+     "loopEnd": 101184
+    },
+    {
+     "root": 83,
+     "start": 786752,
+     "length": 99904,
+     "loopStart": 55168,
+     "loopEnd": 99904
+    },
+    {
+     "root": 86,
+     "start": 886656,
+     "length": 98944,
+     "loopStart": 54115,
+     "loopEnd": 98944
+    }
+   ]
+  },
+  "vsco-violas": {
+   "file": "vsco-violas.3c5c36e39a.flac",
+   "bytes": 1445473,
+   "frames": 1139968,
+   "zones": [
+    {
+     "root": 48,
+     "start": 0,
+     "length": 91264,
+     "loopStart": 55103,
+     "loopEnd": 91264
+    },
+    {
+     "root": 52,
+     "start": 91264,
+     "length": 95424,
+     "loopStart": 51009,
+     "loopEnd": 95424
+    },
+    {
+     "root": 55,
+     "start": 186688,
+     "length": 90304,
+     "loopStart": 54551,
+     "loopEnd": 90304
+    },
+    {
+     "root": 59,
+     "start": 276992,
+     "length": 90304,
+     "loopStart": 54605,
+     "loopEnd": 90304
+    },
+    {
+     "root": 62,
+     "start": 367296,
+     "length": 92864,
+     "loopStart": 39300,
+     "loopEnd": 92864
+    },
+    {
+     "root": 65,
+     "start": 460160,
+     "length": 97984,
+     "loopStart": 62319,
+     "loopEnd": 97984
+    },
+    {
+     "root": 69,
+     "start": 558144,
+     "length": 102464,
+     "loopStart": 57794,
+     "loopEnd": 102464
+    },
+    {
+     "root": 72,
+     "start": 660608,
+     "length": 90304,
+     "loopStart": 45524,
+     "loopEnd": 90304
+    },
+    {
+     "root": 76,
+     "start": 750912,
+     "length": 99904,
+     "loopStart": 46067,
+     "loopEnd": 99904
+    },
+    {
+     "root": 79,
+     "start": 850816,
+     "length": 96704,
+     "loopStart": 60790,
+     "loopEnd": 96704
+    },
+    {
+     "root": 83,
+     "start": 947520,
+     "length": 95744,
+     "loopStart": 59849,
+     "loopEnd": 95744
+    },
+    {
+     "root": 86,
+     "start": 1043264,
+     "length": 96704,
+     "loopStart": 51917,
+     "loopEnd": 96704
+    }
+   ]
+  },
+  "vsco-cellos": {
+   "file": "vsco-cellos.02b2e1108b.flac",
+   "bytes": 1237637,
+   "frames": 1298112,
+   "zones": [
+    {
+     "root": 36,
+     "start": 0,
+     "length": 105664,
+     "loopStart": 70401,
+     "loopEnd": 105664
+    },
+    {
+     "root": 40,
+     "start": 105664,
+     "length": 97984,
+     "loopStart": 53637,
+     "loopEnd": 97984
+    },
+    {
+     "root": 43,
+     "start": 203648,
+     "length": 105664,
+     "loopStart": 69737,
+     "loopEnd": 105664
+    },
+    {
+     "root": 47,
+     "start": 309312,
+     "length": 90624,
+     "loopStart": 37188,
+     "loopEnd": 90624
+    },
+    {
+     "root": 50,
+     "start": 399936,
+     "length": 101184,
+     "loopStart": 65465,
+     "loopEnd": 101184
+    },
+    {
+     "root": 53,
+     "start": 501120,
+     "length": 104704,
+     "loopStart": 51283,
+     "loopEnd": 104704
+    },
+    {
+     "root": 57,
+     "start": 605824,
+     "length": 105984,
+     "loopStart": 61328,
+     "loopEnd": 105984
+    },
+    {
+     "root": 60,
+     "start": 711808,
+     "length": 105024,
+     "loopStart": 60436,
+     "loopEnd": 105024
+    },
+    {
+     "root": 64,
+     "start": 816832,
+     "length": 94784,
+     "loopStart": 50171,
+     "loopEnd": 94784
+    },
+    {
+     "root": 67,
+     "start": 911616,
+     "length": 100544,
+     "loopStart": 46628,
+     "loopEnd": 100544
+    },
+    {
+     "root": 71,
+     "start": 1012160,
+     "length": 97984,
+     "loopStart": 53108,
+     "loopEnd": 97984
+    },
+    {
+     "root": 74,
+     "start": 1110144,
+     "length": 97664,
+     "loopStart": 61721,
+     "loopEnd": 97664
+    },
+    {
+     "root": 77,
+     "start": 1207808,
+     "length": 90304,
+     "loopStart": 54513,
+     "loopEnd": 90304
+    }
+   ]
+  },
+  "vsco-basses": {
+   "file": "vsco-basses.2fa61c36a3.flac",
+   "bytes": 788191,
+   "frames": 864576,
+   "zones": [
+    {
+     "root": 30,
+     "start": 0,
+     "length": 90304,
+     "loopStart": 55423,
+     "loopEnd": 90304
+    },
+    {
+     "root": 34,
+     "start": 90304,
+     "length": 93504,
+     "loopStart": 49600,
+     "loopEnd": 93504
+    },
+    {
+     "root": 38,
+     "start": 183808,
+     "length": 105664,
+     "loopStart": 70063,
+     "loopEnd": 105664
+    },
+    {
+     "root": 42,
+     "start": 289472,
+     "length": 100224,
+     "loopStart": 55888,
+     "loopEnd": 100224
+    },
+    {
+     "root": 45,
+     "start": 389696,
+     "length": 90944,
+     "loopStart": 54569,
+     "loopEnd": 90944
+    },
+    {
+     "root": 49,
+     "start": 480640,
+     "length": 95104,
+     "loopStart": 41028,
+     "loopEnd": 95104
+    },
+    {
+     "root": 52,
+     "start": 575744,
+     "length": 90304,
+     "loopStart": 36536,
+     "loopEnd": 90304
+    },
+    {
+     "root": 56,
+     "start": 666048,
+     "length": 92544,
+     "loopStart": 47464,
+     "loopEnd": 92544
+    },
+    {
+     "root": 59,
+     "start": 758592,
+     "length": 105984,
+     "loopStart": 70345,
+     "loopEnd": 105984
+    }
+   ]
+  },
+  "vsco-violins-pizz": {
+   "file": "vsco-violins-pizz.db38012a12.flac",
+   "bytes": 188774,
+   "frames": 286706,
+   "zones": [
+    {
+     "root": 55,
+     "start": 0,
+     "length": 44800
+    },
+    {
+     "root": 59,
+     "start": 44800,
+     "length": 29264
+    },
+    {
+     "root": 62,
+     "start": 74064,
+     "length": 44800
+    },
+    {
+     "root": 66,
+     "start": 118864,
+     "length": 27485
+    },
+    {
+     "root": 69,
+     "start": 146349,
+     "length": 27868
+    },
+    {
+     "root": 72,
+     "start": 174217,
+     "length": 18676
+    },
+    {
+     "root": 76,
+     "start": 192893,
+     "length": 26612
+    },
+    {
+     "root": 79,
+     "start": 219505,
+     "length": 33389
+    },
+    {
+     "root": 83,
+     "start": 252894,
+     "length": 17109
+    },
+    {
+     "root": 86,
+     "start": 270003,
+     "length": 16703
+    }
+   ]
+  },
+  "vsco-cellos-pizz": {
+   "file": "vsco-cellos-pizz.d20d3a81a4.flac",
+   "bytes": 226964,
+   "frames": 559668,
+   "zones": [
+    {
+     "root": 36,
+     "start": 0,
+     "length": 51200
+    },
+    {
+     "root": 40,
+     "start": 51200,
+     "length": 51200
+    },
+    {
+     "root": 43,
+     "start": 102400,
+     "length": 51200
+    },
+    {
+     "root": 47,
+     "start": 153600,
+     "length": 51200
+    },
+    {
+     "root": 50,
+     "start": 204800,
+     "length": 51200
+    },
+    {
+     "root": 53,
+     "start": 256000,
+     "length": 43259
+    },
+    {
+     "root": 57,
+     "start": 299259,
+     "length": 51200
+    },
+    {
+     "root": 60,
+     "start": 350459,
+     "length": 51200
+    },
+    {
+     "root": 64,
+     "start": 401659,
+     "length": 41597
+    },
+    {
+     "root": 67,
+     "start": 443256,
+     "length": 46912
+    },
+    {
+     "root": 71,
+     "start": 490168,
+     "length": 19057
+    },
+    {
+     "root": 74,
+     "start": 509225,
+     "length": 26659
+    },
+    {
+     "root": 77,
+     "start": 535884,
+     "length": 23784
+    }
+   ]
+  },
+  "vsco-basses-pizz": {
+   "file": "vsco-basses-pizz.adde916d2b.flac",
+   "bytes": 117750,
+   "frames": 230400,
+   "zones": [
+    {
+     "root": 28,
+     "start": 0,
+     "length": 57600
+    },
+    {
+     "root": 31,
+     "start": 57600,
+     "length": 57600
+    },
+    {
+     "root": 34,
+     "start": 115200,
+     "length": 57600
+    },
+    {
+     "root": 40,
+     "start": 172800,
+     "length": 57600
+    }
+   ]
+  },
+  "vsco-solo-violin": {
+   "file": "vsco-solo-violin.601b97b32a.flac",
+   "bytes": 1358223,
+   "frames": 1047744,
+   "zones": [
+    {
+     "root": 55,
+     "start": 0,
+     "length": 102464,
+     "loopStart": 66340,
+     "loopEnd": 102464
+    },
+    {
+     "root": 60,
+     "start": 102464,
+     "length": 92224,
+     "loopStart": 38645,
+     "loopEnd": 92224
+    },
+    {
+     "root": 64,
+     "start": 194688,
+     "length": 90304,
+     "loopStart": 36537,
+     "loopEnd": 90304
+    },
+    {
+     "root": 67,
+     "start": 284992,
+     "length": 94464,
+     "loopStart": 40795,
+     "loopEnd": 94464
+    },
+    {
+     "root": 72,
+     "start": 379456,
+     "length": 90624,
+     "loopStart": 54887,
+     "loopEnd": 90624
+    },
+    {
+     "root": 76,
+     "start": 470080,
+     "length": 90304,
+     "loopStart": 36468,
+     "loopEnd": 90304
+    },
+    {
+     "root": 79,
+     "start": 560384,
+     "length": 94144,
+     "loopStart": 58291,
+     "loopEnd": 94144
+    },
+    {
+     "root": 84,
+     "start": 654528,
+     "length": 96384,
+     "loopStart": 51561,
+     "loopEnd": 96384
+    },
+    {
+     "root": 88,
+     "start": 750912,
+     "length": 102464,
+     "loopStart": 66586,
+     "loopEnd": 102464
+    },
+    {
+     "root": 91,
+     "start": 853376,
+     "length": 92224,
+     "loopStart": 56369,
+     "loopEnd": 92224
+    },
+    {
+     "root": 96,
+     "start": 945600,
+     "length": 102144,
+     "loopStart": 66299,
+     "loopEnd": 102144
+    }
+   ]
+  },
+  "vsco-harp": {
+   "file": "vsco-harp.b37b641b66.flac",
+   "bytes": 1201565,
+   "frames": 1925991,
+   "zones": [
+    {
+     "root": 28,
+     "start": 0,
+     "length": 96000
+    },
+    {
+     "root": 31,
+     "start": 96000,
+     "length": 96000
+    },
+    {
+     "root": 35,
+     "start": 192000,
+     "length": 96000
+    },
+    {
+     "root": 38,
+     "start": 288000,
+     "length": 96000
+    },
+    {
+     "root": 41,
+     "start": 384000,
+     "length": 96000
+    },
+    {
+     "root": 45,
+     "start": 480000,
+     "length": 96000
+    },
+    {
+     "root": 48,
+     "start": 576000,
+     "length": 96000
+    },
+    {
+     "root": 52,
+     "start": 672000,
+     "length": 96000
+    },
+    {
+     "root": 55,
+     "start": 768000,
+     "length": 96000
+    },
+    {
+     "root": 59,
+     "start": 864000,
+     "length": 96000
+    },
+    {
+     "root": 62,
+     "start": 960000,
+     "length": 96000
+    },
+    {
+     "root": 65,
+     "start": 1056000,
+     "length": 96000
+    },
+    {
+     "root": 69,
+     "start": 1152000,
+     "length": 96000
+    },
+    {
+     "root": 72,
+     "start": 1248000,
+     "length": 96000
+    },
+    {
+     "root": 76,
+     "start": 1344000,
+     "length": 96000
+    },
+    {
+     "root": 79,
+     "start": 1440000,
+     "length": 96000
+    },
+    {
+     "root": 83,
+     "start": 1536000,
+     "length": 96000
+    },
+    {
+     "root": 86,
+     "start": 1632000,
+     "length": 76118
+    },
+    {
+     "root": 89,
+     "start": 1708118,
+     "length": 74936
+    },
+    {
+     "root": 93,
+     "start": 1783054,
+     "length": 92442
+    },
+    {
+     "root": 98,
+     "start": 1875496,
+     "length": 31132
+    },
+    {
+     "root": 101,
+     "start": 1906628,
+     "length": 19363
+    }
+   ]
+  },
+  "vsco-trumpet": {
+   "file": "vsco-trumpet.a7631c7380.flac",
+   "bytes": 1083493,
+   "frames": 923200,
+   "zones": [
+    {
+     "root": 53,
+     "start": 0,
+     "length": 92416,
+     "loopStart": 56913,
+     "loopEnd": 92416
+    },
+    {
+     "root": 57,
+     "start": 92416,
+     "length": 91136,
+     "loopStart": 55214,
+     "loopEnd": 91136
+    },
+    {
+     "root": 60,
+     "start": 183552,
+     "length": 87616,
+     "loopStart": 42856,
+     "loopEnd": 87616
+    },
+    {
+     "root": 63,
+     "start": 271168,
+     "length": 97536,
+     "loopStart": 52916,
+     "loopEnd": 97536
+    },
+    {
+     "root": 67,
+     "start": 368704,
+     "length": 95616,
+     "loopStart": 59929,
+     "loopEnd": 95616
+    },
+    {
+     "root": 70,
+     "start": 464320,
+     "length": 97856,
+     "loopStart": 44070,
+     "loopEnd": 97856
+    },
+    {
+     "root": 74,
+     "start": 562176,
+     "length": 84416,
+     "loopStart": 48470,
+     "loopEnd": 84416
+    },
+    {
+     "root": 77,
+     "start": 646592,
+     "length": 86336,
+     "loopStart": 41486,
+     "loopEnd": 86336
+    },
+    {
+     "root": 81,
+     "start": 732928,
+     "length": 99456,
+     "loopStart": 54637,
+     "loopEnd": 99456
+    },
+    {
+     "root": 84,
+     "start": 832384,
+     "length": 90816,
+     "loopStart": 54941,
+     "loopEnd": 90816
+    }
+   ]
+  },
+  "vsco-horn": {
+   "file": "vsco-horn.52418ec455.flac",
+   "bytes": 426732,
+   "frames": 742848,
+   "zones": [
+    {
+     "root": 36,
+     "start": 0,
+     "length": 92096,
+     "loopStart": 56977,
+     "loopEnd": 92096
+    },
+    {
+     "root": 39,
+     "start": 92096,
+     "length": 91776,
+     "loopStart": 38291,
+     "loopEnd": 91776
+    },
+    {
+     "root": 43,
+     "start": 183872,
+     "length": 90176,
+     "loopStart": 36603,
+     "loopEnd": 90176
+    },
+    {
+     "root": 46,
+     "start": 274048,
+     "length": 99776,
+     "loopStart": 54544,
+     "loopEnd": 99776
+    },
+    {
+     "root": 50,
+     "start": 373824,
+     "length": 90176,
+     "loopStart": 45232,
+     "loopEnd": 90176
+    },
+    {
+     "root": 53,
+     "start": 464000,
+     "length": 93376,
+     "loopStart": 48850,
+     "loopEnd": 93376
+    },
+    {
+     "root": 57,
+     "start": 557376,
+     "length": 86336,
+     "loopStart": 32354,
+     "loopEnd": 86336
+    },
+    {
+     "root": 60,
+     "start": 643712,
+     "length": 99136,
+     "loopStart": 63467,
+     "loopEnd": 99136
+    }
+   ]
+  },
+  "vsco-trombone": {
+   "file": "vsco-trombone.01127959fe.flac",
+   "bytes": 603055,
+   "frames": 738048,
+   "zones": [
+    {
+     "root": 34,
+     "start": 0,
+     "length": 97216,
+     "loopStart": 44495,
+     "loopEnd": 97216
+    },
+    {
+     "root": 37,
+     "start": 97216,
+     "length": 87616,
+     "loopStart": 42364,
+     "loopEnd": 87616
+    },
+    {
+     "root": 41,
+     "start": 184832,
+     "length": 95296,
+     "loopStart": 60106,
+     "loopEnd": 95296
+    },
+    {
+     "root": 46,
+     "start": 280128,
+     "length": 93696,
+     "loopStart": 48664,
+     "loopEnd": 93696
+    },
+    {
+     "root": 50,
+     "start": 373824,
+     "length": 93376,
+     "loopStart": 48918,
+     "loopEnd": 93376
+    },
+    {
+     "root": 53,
+     "start": 467200,
+     "length": 84416,
+     "loopStart": 39886,
+     "loopEnd": 84416
+    },
+    {
+     "root": 60,
+     "start": 551616,
+     "length": 99136,
+     "loopStart": 45318,
+     "loopEnd": 99136
+    },
+    {
+     "root": 63,
+     "start": 650752,
+     "length": 87296,
+     "loopStart": 51398,
+     "loopEnd": 87296
+    }
+   ]
+  },
+  "vsco-tuba": {
+   "file": "vsco-tuba.5f14a09502.flac",
+   "bytes": 357395,
+   "frames": 567936,
+   "zones": [
+    {
+     "root": 34,
+     "start": 0,
+     "length": 98496,
+     "loopStart": 53996,
+     "loopEnd": 98496
+    },
+    {
+     "root": 39,
+     "start": 98496,
+     "length": 84736,
+     "loopStart": 40331,
+     "loopEnd": 84736
+    },
+    {
+     "root": 46,
+     "start": 183232,
+     "length": 89216,
+     "loopStart": 43889,
+     "loopEnd": 89216
+    },
+    {
+     "root": 50,
+     "start": 272448,
+     "length": 97856,
+     "loopStart": 62255,
+     "loopEnd": 97856
+    },
+    {
+     "root": 53,
+     "start": 370304,
+     "length": 100096,
+     "loopStart": 64541,
+     "loopEnd": 100096
+    },
+    {
+     "root": 58,
+     "start": 470400,
+     "length": 97536,
+     "loopStart": 61910,
+     "loopEnd": 97536
+    }
+   ]
+  },
+  "vsco-flute": {
+   "file": "vsco-flute.e7ea8d8329.flac",
+   "bytes": 960528,
+   "frames": 927680,
+   "zones": [
+    {
+     "root": 60,
+     "start": 0,
+     "length": 96896,
+     "loopStart": 52333,
+     "loopEnd": 96896
+    },
+    {
+     "root": 64,
+     "start": 96896,
+     "length": 84736,
+     "loopStart": 49070,
+     "loopEnd": 84736
+    },
+    {
+     "root": 69,
+     "start": 181632,
+     "length": 94976,
+     "loopStart": 50274,
+     "loopEnd": 94976
+    },
+    {
+     "root": 72,
+     "start": 276608,
+     "length": 100096,
+     "loopStart": 64338,
+     "loopEnd": 100096
+    },
+    {
+     "root": 76,
+     "start": 376704,
+     "length": 95936,
+     "loopStart": 60028,
+     "loopEnd": 95936
+    },
+    {
+     "root": 81,
+     "start": 472640,
+     "length": 93056,
+     "loopStart": 57244,
+     "loopEnd": 93056
+    },
+    {
+     "root": 84,
+     "start": 565696,
+     "length": 85376,
+     "loopStart": 40609,
+     "loopEnd": 85376
+    },
+    {
+     "root": 88,
+     "start": 651072,
+     "length": 94016,
+     "loopStart": 49235,
+     "loopEnd": 94016
+    },
+    {
+     "root": 93,
+     "start": 745088,
+     "length": 86016,
+     "loopStart": 50142,
+     "loopEnd": 86016
+    },
+    {
+     "root": 96,
+     "start": 831104,
+     "length": 96576,
+     "loopStart": 60711,
+     "loopEnd": 96576
+    }
+   ]
+  },
+  "vsco-oboe": {
+   "file": "vsco-oboe.932c7473be.flac",
+   "bytes": 814533,
+   "frames": 831104,
+   "zones": [
+    {
+     "root": 58,
+     "start": 0,
+     "length": 94656,
+     "loopStart": 58981,
+     "loopEnd": 94656
+    },
+    {
+     "root": 62,
+     "start": 94656,
+     "length": 98496,
+     "loopStart": 53909,
+     "loopEnd": 98496
+    },
+    {
+     "root": 65,
+     "start": 193152,
+     "length": 85056,
+     "loopStart": 40228,
+     "loopEnd": 85056
+    },
+    {
+     "root": 70,
+     "start": 278208,
+     "length": 87936,
+     "loopStart": 43105,
+     "loopEnd": 87936
+    },
+    {
+     "root": 74,
+     "start": 366144,
+     "length": 100096,
+     "loopStart": 64309,
+     "loopEnd": 100096
+    },
+    {
+     "root": 77,
+     "start": 466240,
+     "length": 89856,
+     "loopStart": 45052,
+     "loopEnd": 89856
+    },
+    {
+     "root": 82,
+     "start": 556096,
+     "length": 99456,
+     "loopStart": 45693,
+     "loopEnd": 99456
+    },
+    {
+     "root": 86,
+     "start": 655552,
+     "length": 90176,
+     "loopStart": 45345,
+     "loopEnd": 90176
+    },
+    {
+     "root": 89,
+     "start": 745728,
+     "length": 85376,
+     "loopStart": 31640,
+     "loopEnd": 85376
+    }
+   ]
+  },
+  "vsco-clarinet": {
+   "file": "vsco-clarinet.568b356012.flac",
+   "bytes": 1003046,
+   "frames": 1059456,
+   "zones": [
+    {
+     "root": 50,
+     "start": 0,
+     "length": 98176,
+     "loopStart": 62422,
+     "loopEnd": 98176
+    },
+    {
+     "root": 53,
+     "start": 98176,
+     "length": 99776,
+     "loopStart": 63657,
+     "loopEnd": 99776
+    },
+    {
+     "root": 58,
+     "start": 197952,
+     "length": 98496,
+     "loopStart": 62839,
+     "loopEnd": 98496
+    },
+    {
+     "root": 62,
+     "start": 296448,
+     "length": 86016,
+     "loopStart": 50034,
+     "loopEnd": 86016
+    },
+    {
+     "root": 65,
+     "start": 382464,
+     "length": 89856,
+     "loopStart": 53876,
+     "loopEnd": 89856
+    },
+    {
+     "root": 70,
+     "start": 472320,
+     "length": 98816,
+     "loopStart": 62988,
+     "loopEnd": 98816
+    },
+    {
+     "root": 74,
+     "start": 571136,
+     "length": 100096,
+     "loopStart": 64299,
+     "loopEnd": 100096
+    },
+    {
+     "root": 77,
+     "start": 671232,
+     "length": 100096,
+     "loopStart": 64268,
+     "loopEnd": 100096
+    },
+    {
+     "root": 82,
+     "start": 771328,
+     "length": 95296,
+     "loopStart": 50429,
+     "loopEnd": 95296
+    },
+    {
+     "root": 86,
+     "start": 866624,
+     "length": 100096,
+     "loopStart": 64266,
+     "loopEnd": 100096
+    },
+    {
+     "root": 89,
+     "start": 966720,
+     "length": 92736,
+     "loopStart": 56909,
+     "loopEnd": 92736
+    }
+   ]
+  },
+  "vsco-bassoon": {
+   "file": "vsco-bassoon.72307e0bb0.flac",
+   "bytes": 577319,
+   "frames": 910080,
+   "zones": [
+    {
+     "root": 34,
+     "start": 0,
+     "length": 94336,
+     "loopStart": 58086,
+     "loopEnd": 94336
+    },
+    {
+     "root": 37,
+     "start": 94336,
+     "length": 89856,
+     "loopStart": 54290,
+     "loopEnd": 89856
+    },
+    {
+     "root": 41,
+     "start": 184192,
+     "length": 100096,
+     "loopStart": 64905,
+     "loopEnd": 100096
+    },
+    {
+     "root": 45,
+     "start": 284288,
+     "length": 89856,
+     "loopStart": 53487,
+     "loopEnd": 89856
+    },
+    {
+     "root": 48,
+     "start": 374144,
+     "length": 86976,
+     "loopStart": 33397,
+     "loopEnd": 86976
+    },
+    {
+     "root": 55,
+     "start": 461120,
+     "length": 84416,
+     "loopStart": 48342,
+     "loopEnd": 84416
+    },
+    {
+     "root": 60,
+     "start": 545536,
+     "length": 100096,
+     "loopStart": 55215,
+     "loopEnd": 100096
+    },
+    {
+     "root": 63,
+     "start": 645632,
+     "length": 85696,
+     "loopStart": 49813,
+     "loopEnd": 85696
+    },
+    {
+     "root": 68,
+     "start": 731328,
+     "length": 84736,
+     "loopStart": 48761,
+     "loopEnd": 84736
+    },
+    {
+     "root": 72,
+     "start": 816064,
+     "length": 94016,
+     "loopStart": 58184,
+     "loopEnd": 94016
+    }
+   ]
+  }
+ }
+}

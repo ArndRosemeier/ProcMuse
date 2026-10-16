@@ -6,6 +6,7 @@ import { P, getStyle, seedFrom, type EngineEvent } from '@procmuse/engine';
 import { Workspace, browserStore, captureGlobalErrors, h } from '@procmuse/ui';
 import { WebEngine } from '@procmuse/web';
 import processorUrl from '@procmuse/web/processor?worker&url';
+import { Collections } from './instruments.js';
 import { buildPanels } from './panels.js';
 import { decodePreset, applyPreset, type PresetTarget } from './presets.js';
 import { registerShortcuts } from './shortcuts.js';
@@ -68,19 +69,25 @@ async function start(): Promise<void> {
   }
 
   const targets: PresetTarget[] = [{ name: 'music', source: engine }];
+  const collections = new Collections(engine);
   if (visuals?.source) targets.push({ name: 'visuals', source: visuals.source });
 
   // a shared link (#p=...) restores someone's settings
   const shared = new URLSearchParams(location.hash.slice(1)).get('p');
   if (shared) {
     try {
-      applyPreset(targets, decodePreset(shared));
+      const { [P.collection]: collection, ...rest } = decodePreset(shared);
+      applyPreset(targets, rest);
+      // the sharer's instrument collection joins once it has downloaded; the music starts meanwhile
+      if (typeof collection === 'string') {
+        collections.use(collection).catch((err: unknown) => ws.errors.show(err, 'Shared instrument collection'));
+      }
     } catch (err) {
       ws.errors.show(err, 'Shared settings could not be applied');
     }
   }
 
-  const ui = buildPanels({ ws, engine, visuals, targets, store });
+  const ui = buildPanels({ ws, engine, visuals, targets, store, collections });
   registerShortcuts(ws, engine);
 
   engine.on('event', (e: EngineEvent) => {

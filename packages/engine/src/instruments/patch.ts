@@ -82,7 +82,14 @@ export interface PluckOsc extends OscBase {
   brightness: number;
 }
 
-export type OscSpec = WaveOsc | FmOsc | NoiseOsc | PluckOsc;
+/** A recorded instrument: plays the nearest zone of a SampleSet (instruments/samples.ts), repitched. */
+export interface SampleOsc extends OscBase {
+  type: 'sample';
+  /** id of the SampleSet the host loads */
+  set: string;
+}
+
+export type OscSpec = WaveOsc | FmOsc | NoiseOsc | PluckOsc | SampleOsc;
 
 export interface FilterSpec {
   mode: FilterMode;
@@ -139,6 +146,8 @@ export interface Patch {
   glide?: number;
   /** always sound this MIDI note, whatever is played (drums) */
   fixedNote?: number;
+  /** playable MIDI range [low, high], at least an octave: notes outside are moved by octaves into it */
+  range?: [number, number];
   oscillators: OscSpec[];
   amp: AdsrSpec;
   filter?: FilterSpec;
@@ -169,6 +178,11 @@ function adsr(patch: Patch, name: string, e: AdsrSpec): void {
   finite(patch, `${name}.release`, e.release, 0, 30);
 }
 
+/** The sample sets a patch plays (none for a synthesized patch). */
+export function patchSampleSets(patch: Patch): string[] {
+  return patch.oscillators.flatMap((o) => (o.type === 'sample' ? [o.set] : []));
+}
+
 /** Validates a patch at the boundary (registry load, or a patch supplied by an app). Throws loudly. */
 export function validatePatch(patch: Patch): Patch {
   if (!patch || typeof patch.id !== 'string' || !patch.id) bad(patch ?? {}, 'missing id');
@@ -191,9 +205,17 @@ export function validatePatch(patch: Patch): Patch {
     } else if (o.type === 'pluck') {
       finite(patch, `osc${i}.decay`, o.decay, 0.01, 30);
       finite(patch, `osc${i}.brightness`, o.brightness, 0, 1);
+    } else if (o.type === 'sample') {
+      if (typeof o.set !== 'string' || !o.set) bad(patch, `osc${i}.set missing`);
     } else if (o.type !== 'noise') {
       bad(patch, `osc${i}.type invalid`);
     }
+  }
+  if (patch.range) {
+    const [lo, hi] = patch.range;
+    finite(patch, 'range.low', lo, 0, 127);
+    finite(patch, 'range.high', hi, 0, 127);
+    if (hi - lo < 12) bad(patch, `range ${lo}..${hi} is narrower than an octave`);
   }
   adsr(patch, 'amp', patch.amp);
   if (patch.filter) {

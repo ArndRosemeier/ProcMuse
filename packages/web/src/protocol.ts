@@ -3,7 +3,7 @@
  * thread (processor). Both sides validate what they receive: a malformed
  * message is a loud error, never ignored.
  */
-import { ProcMuseError, type EngineCommand, type EngineEvent, type ParamValue, type ParamValues } from '@procmuse/engine';
+import { ProcMuseError, type EngineCommand, type EngineEvent, type ParamValue, type ParamValues, type SampleSet } from '@procmuse/engine';
 
 export const PROCESSOR_NAME = 'procmuse-engine';
 
@@ -11,6 +11,8 @@ export type ToProcessor =
   | { type: 'set'; id: string; value: ParamValue }
   | { type: 'setMany'; values: ParamValues }
   | { type: 'command'; command: EngineCommand }
+  /** decoded recordings; the engine validates each set */
+  | { type: 'samples'; sets: SampleSet[] }
   | { type: 'play' }
   | { type: 'pause' };
 
@@ -45,6 +47,9 @@ export function parseToProcessor(data: unknown): ToProcessor {
       return data as ToProcessor;
     case 'command':
       if (!isObj(data.command) || typeof data.command.type !== 'string') fail('bad command', data);
+      return data as ToProcessor;
+    case 'samples':
+      if (!Array.isArray(data.sets)) fail('bad samples', { type: data.type });
       return data as ToProcessor;
     case 'play':
     case 'pause':

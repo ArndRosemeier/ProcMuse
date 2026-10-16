@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Renders music to a WAV file and prints loudness stats per second.
 // Usage: npm run render -- [--style demoscene] [--seed 42] [--seconds 60] [--out renders/out.wav] [--set id=value ...]
-// Requires a build (`npm run typecheck` emits packages/engine/dist).
+// Requires a build (`npm run typecheck` emits packages/engine/dist). A collection
+// (--set instruments.collection=strings) loads its recordings with ffmpeg.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { renderOffline, encodeWav } from '../dist/index.js';
@@ -24,7 +25,9 @@ for (const kv of opt.set) {
   params[k] = v === 'true' ? true : v === 'false' ? false : Number.isNaN(Number(v)) ? v : Number(v);
 }
 const t0 = performance.now();
-const res = renderOffline({ seconds: opt.seconds, params });
+const collection = params['instruments.collection'];
+const samples = typeof collection === 'string' && collection !== 'none' ? (await import('../../../scripts/samples/node-loader.mjs')).loadCollection(collection) : [];
+const res = renderOffline({ seconds: opt.seconds, params, samples });
 const ms = performance.now() - t0;
 const sr = res.sampleRate;
 let peak = 0;

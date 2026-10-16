@@ -60,6 +60,9 @@ class ProcMuseProcessor extends AudioWorkletProcessor {
         case 'command':
           core.command(msg.command);
           break;
+        case 'samples':
+          for (const set of msg.sets) core.addSamples(set);
+          break;
         case 'play':
           this.playing = true;
           break;

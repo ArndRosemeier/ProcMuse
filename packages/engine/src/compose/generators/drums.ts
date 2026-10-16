@@ -1,7 +1,8 @@
 /** Drum generator: one algorithm for every drum part, driven by the style's probability grids. */
 import { Rng } from '../../core/rng.js';
 import type { PartId } from '../parts.js';
-import { accent, foldInto, noteAt } from '../rhythm.js';
+import { foldInto } from '../../theory/pitch.js';
+import { accent, noteAt } from '../rhythm.js';
 import type { Grid } from '../style.js';
 import type { BarContext, NoteEvent } from '../types.js';
 

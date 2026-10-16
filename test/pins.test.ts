@@ -35,8 +35,11 @@ describe('pins', () => {
     expect(grep(src('engine'), /class\s+\w*(Voice|Synth)\b/)).toEqual(['packages/engine/src/instruments/voice.ts']);
   });
 
-  it('instruments are data: patch files declare no classes or functions (helpers.ts excepted)', () => {
-    const patchFiles = files(join(ROOT, 'packages/engine/src/instruments/patches')).filter((p) => !p.endsWith('helpers.ts'));
+  it('instruments are data: patch and collection files declare no classes or functions (helpers.ts excepted)', () => {
+    const patchFiles = [
+      ...files(join(ROOT, 'packages/engine/src/instruments/patches')),
+      ...files(join(ROOT, 'packages/engine/src/compose/collections')),
+    ].filter((p) => !p.endsWith('helpers.ts'));
     expect(patchFiles.length).toBeGreaterThan(0);
     expect(grep(patchFiles, /\bclass\s|\bfunction\s|=>/)).toEqual([]);
   });

@@ -5,7 +5,9 @@ The state of record; one screen, overwritten in place. Reconcile with `bash scri
 ```
 reconciled: SEE_GIT · 2026-10-16
 
-SESSION | id=claude-projects thread "Title screen horizontal scroll" | state=landed: start screen title fits its card (ledger 17)
+SESSION | id=claude-projects thread "instruments" | state=landed: recorded-instrument collections (ledger 18)
+
+LANDED | ledger=18 | recorded-instrument collections: six collections (Broad Spectrum + five sections) from VSCO 2 CE, one-press download, Real instruments slider (gate GREEN, e2e GREEN)
 
 LANDED | ledger=17 | start screen: no horizontal scroll bar, the title sizes to its card on desktop and phone (gate GREEN, e2e GREEN)
 
@@ -19,8 +21,7 @@ LANDED | ledger=13 | phone layout: one sheet above a full-width dock, touch sizi
 
 LANDED | ledger=12 | wow-factor instruments: horns, bells, organs, bagpipes, choir, taiko, gong (gate GREEN, e2e GREEN)
 
-QUEUE | row=8 | listening pass on mix balance and patches, incl. the 16 new ones and the 12 new styles (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
-QUEUE | row=9 | sample-based instruments (piano, strings, voice) as an OscSpec type | src=ledger row 3
+QUEUE | row=8 | listening pass on mix balance and patches, incl. the 16 new ones, the 12 new styles and the recorded collections (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
 QUEUE | row=10 | publish @procmuse/engine to npm (build dist, versioning) | src=README.md
 
 RECOVERY | repo=https://github.com/ArndRosemeier/ProcMuse | branch=main | gate=bash scripts/gate.sh | e2e=npm run e2e

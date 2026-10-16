@@ -1,10 +1,15 @@
-/** The patch library: every built-in instrument, validated once at load. */
+/**
+ * The patch library, validated once at load: the synthesized instruments (offered
+ * in the Band menus) and the recorded ones (cast by collections, playable once
+ * their samples are loaded).
+ */
 import { ProcMuseError } from '../core/errors.js';
 import { validatePatch, type Patch, type PatchCategory } from './patch.js';
 import { BASS_PATCHES } from './patches/bass.js';
 import { DRUM_PATCHES } from './patches/drums.js';
 import { HARMONIC_PATCHES } from './patches/harmonic.js';
 import { MELODIC_PATCHES } from './patches/melodic.js';
+import { RECORDED_PATCHES as RECORDED } from './patches/recorded.js';
 import { TEXTURE_PATCHES } from './patches/texture.js';
 
 export const BUILTIN_PATCHES: readonly Patch[] = [
@@ -15,8 +20,10 @@ export const BUILTIN_PATCHES: readonly Patch[] = [
   ...TEXTURE_PATCHES,
 ].map(validatePatch);
 
+export const RECORDED_PATCHES: readonly Patch[] = RECORDED.map(validatePatch);
+
 const BY_ID = new Map<string, Patch>();
-for (const p of BUILTIN_PATCHES) {
+for (const p of [...BUILTIN_PATCHES, ...RECORDED_PATCHES]) {
   if (BY_ID.has(p.id)) throw new ProcMuseError('invalid-patch', `duplicate patch id ${p.id}`);
   BY_ID.set(p.id, p);
 }
