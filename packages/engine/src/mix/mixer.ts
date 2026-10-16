@@ -39,6 +39,8 @@ export interface MixSettings {
 class Channel {
   readonly part: PartId;
   instrument: Instrument | null = null;
+  /** the instrument it replaced, ringing out its released notes so a swap never cuts a tail */
+  retiring: Instrument | null = null;
   readonly l = new Float32Array(MAX_BLOCK);
   readonly r = new Float32Array(MAX_BLOCK);
   settings: ChannelSettings = { gainDb: 0, pan: 0, reverb: 0, delay: 0 };
@@ -102,6 +104,10 @@ export class Mixer {
   setInstrument(index: number, patch: Patch, seed: number): void {
     const ch = this.channels[index] as Channel;
     if (ch.instrument?.patch.id === patch.id) return;
+    if (ch.instrument) {
+      ch.instrument.allOff();
+      ch.retiring = ch.instrument;
+    }
     ch.instrument = new Instrument(patch, this.sampleRate, seed);
   }
 
@@ -126,7 +132,10 @@ export class Mixer {
   }
 
   allNotesOff(): void {
-    for (const ch of this.channels) ch.instrument?.allOff();
+    for (const ch of this.channels) {
+      ch.instrument?.allOff();
+      ch.retiring?.allOff();
+    }
   }
 
   /** Kick hit at `offset` frames into the current block. */
@@ -144,7 +153,13 @@ export class Mixer {
   /** Renders every channel's voices over [start, end) of the block. */
   renderVoices(start: number, end: number): void {
     if (end <= start) return;
-    for (const ch of this.channels) ch.instrument?.render(ch.l, ch.r, start, end, this.voiceCtx);
+    for (const ch of this.channels) {
+      ch.instrument?.render(ch.l, ch.r, start, end, this.voiceCtx);
+      if (ch.retiring) {
+        ch.retiring.render(ch.l, ch.r, start, end, this.voiceCtx);
+        if (ch.retiring.activeVoices === 0) ch.retiring = null;
+      }
+    }
   }
 
   /** Mixes the block into outL/outR. */
@@ -217,7 +232,7 @@ export class Mixer {
   /** Active voices across all channels (for diagnostics). */
   get voiceCount(): number {
     let v = 0;
-    for (const ch of this.channels) v += ch.instrument?.activeVoices ?? 0;
+    for (const ch of this.channels) v += (ch.instrument?.activeVoices ?? 0) + (ch.retiring?.activeVoices ?? 0);
     return v;
   }
 }

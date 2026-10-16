@@ -28,7 +28,10 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Decay time ("falls 60 dB in T seconds") | `t60Gain` | `packages/engine/src/core/math.ts` | `instruments.test: fades one oscillator on its own clock` |
 | An instrument's body (fixed resonant peaks) | `Patch.formant`, rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `instruments.test: formant peaks are unity gain` |
 | Polyphony/stealing | `Instrument` | `instruments/instrument.ts` | `instruments.test: steals voices` |
-| A genre | a `Style` (data) validated by `validateStyle` | `compose/style.ts`, `compose/styles/builtin.ts` | `pins: styles are data` |
+| A genre | a `Style` (data) validated by `validateStyle`, in a family file (`electronic.ts`, `chill.ts`, `world.ts`) listed once in `BUILTIN_STYLES`; the picker, shortcuts and the journey follow from `STYLES` | `compose/style.ts`, `compose/styles/` | `pins: styles are data`, `composer.test: style catalogue` (every patch is some style's default; every two styles differ in ≥ 3 parts) |
+| A shared song form or harmony table | `base.ts` (`DEFAULT_FORM`, `GROOVE_FORM`, `DRIFT_FORM`, `MINOR_POP`, `MAJOR_POP`, `MODAL`, `JAZZY`) | `compose/styles/base.ts` | — |
+| Moving on to another style (the journey) | `Composer.planKind`: when `journey()` bars have passed it plays an outro, then starts the next piece in a new style (fresh themes, new auto key) and reports `styleChange`; `EngineCore.adoptJourneyStyle` applies it at that bar line | `compose/composer.ts`, `engine/core.ts` | `composer.test: moves on to a new style`, `engine.test: moves on to a new style by itself` |
+| Swapping an instrument without cutting its notes | `Mixer.setInstrument` keeps the old one as `retiring` until its tails die | `mix/mixer.ts` | `engine.test: a new instrument lets the old one ring out` |
 | Swing + humanize | `noteAt()` / `stepToBeat()` | `compose/rhythm.ts` | `pins: swing and humanize` |
 | Saturation | `softClip` / `drive` | `dsp/shape.ts` | `pins: saturation` |
 | Rendering audio | `EngineCore.process` (live worklet AND offline) | `engine/core.ts` | engine tests |
@@ -52,7 +55,11 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 - **Styles reset the mix.** Changing `music.style` applies that style's tempo, swing,
   instruments and mix (`styleDefaults`), and the engine announces each change as a
   `param` event so mirrors (WebEngine, UI) follow. A preset applies `music.style` first
-  for that reason (`apps/procmuse/src/presets.ts`).
+  for that reason (`apps/procmuse/src/presets.ts`). The journey (`music.journey`,
+  default Sometimes = every ~64 bars) changes the style by itself, so hand-made
+  instrument choices last until the next piece; set Style changes to Never to keep them.
+- **A bass/chord pattern name must not equal a style id**: the styles-are-data pin
+  greps generators for quoted style ids (a `'dub'` bass pattern tripped it; it is `'riddim'`).
 - **Engine time vs. heard time.** Events carry engine-clock seconds at render time.
   `WebEngine.musicState()` maps the context's output timestamp back to engine time
   using the offset the processor reports, so visuals line up with what is *heard*.

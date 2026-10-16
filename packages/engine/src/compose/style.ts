@@ -14,9 +14,9 @@ import { SECTION_KINDS, type SectionKind } from './types.js';
 /** 16 step probabilities (one bar of 16ths), 0..1. */
 export type Grid = readonly number[];
 
-export const BASS_PATTERNS = ['pulse8', 'offbeat', 'root4', 'sync', 'walk', 'long', 'arp', 'gallop'] as const;
+export const BASS_PATTERNS = ['pulse8', 'offbeat', 'root4', 'sync', 'walk', 'long', 'arp', 'gallop', 'octave', 'riddim'] as const;
 export type BassPattern = (typeof BASS_PATTERNS)[number];
-export const CHORD_PATTERNS = ['sustain', 'stabs', 'pulse', 'offbeat', 'strum'] as const;
+export const CHORD_PATTERNS = ['sustain', 'stabs', 'pulse', 'offbeat', 'strum', 'skank', 'comp'] as const;
 export type ChordPattern = (typeof CHORD_PATTERNS)[number];
 export const ARP_PATTERNS = ['up', 'down', 'updown', 'random', 'pinky', 'converge'] as const;
 export type ArpPattern = (typeof ARP_PATTERNS)[number];

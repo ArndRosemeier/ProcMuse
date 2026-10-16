@@ -27,9 +27,15 @@ export function seedFrom(entropy: number): number {
   return (entropy >>> 0) % SEED_LIMIT;
 }
 
+/** How long a style plays before the music moves on to another one on its own (in bars; null stays). */
+export const JOURNEY_BARS = { never: null, rarely: 128, sometimes: 64, often: 32 } as const satisfies Record<string, number | null>;
+export type JourneyPace = keyof typeof JOURNEY_BARS;
+const JOURNEY_LABELS: Record<JourneyPace, string> = { never: 'Never', rarely: 'Rarely', sometimes: 'Sometimes', often: 'Often' };
+
 /** Param ids, so no other module spells them by hand. */
 export const P = {
   style: 'music.style',
+  journey: 'music.journey',
   seed: 'music.seed',
   tempo: 'music.tempo',
   key: 'music.key',
@@ -74,6 +80,19 @@ export function buildParamSpecs(): ParamSpec[] {
       group: 'Music',
       options: STYLES.map((s) => ({ value: s.id, label: s.name, description: s.description })),
       default: DEFAULT_STYLE_ID,
+    },
+    {
+      kind: 'enum',
+      id: P.journey,
+      label: 'Style changes',
+      description: 'How often the music moves on to a new style by itself: each style ends with an outro, then another begins. Never keeps the chosen style.',
+      group: 'Music',
+      options: (Object.keys(JOURNEY_BARS) as JourneyPace[]).map((k) => ({
+        value: k,
+        label: JOURNEY_LABELS[k],
+        description: JOURNEY_BARS[k] === null ? 'Stay in the chosen style.' : `A new style about every ${JOURNEY_BARS[k]} bars.`,
+      })),
+      default: 'sometimes',
     },
     {
       kind: 'number',

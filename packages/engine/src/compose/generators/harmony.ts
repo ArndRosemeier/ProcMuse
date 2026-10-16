@@ -13,6 +13,15 @@ const STAB_TEMPLATES = [
   [3, 6, 11, 14],
 ];
 
+/** Comping rhythms (jazz, bossa, funk): drawn anew each bar, so the comping talks. */
+const COMP_TEMPLATES = [
+  [0, 6, 10],
+  [2, 6, 11, 14],
+  [0, 3, 8, 11],
+  [3, 6, 10, 14],
+  [0, 7, 12],
+];
+
 function voiceCount(ctx: BarContext): number {
   const [lo, hi] = ctx.style.chords.voices;
   return Math.round(lo + (hi - lo) * ctx.macros.complexity);
@@ -30,13 +39,16 @@ export function generateChords(ctx: BarContext, mem: PartMemory): NoteEvent[] {
   const out: NoteEvent[] = [];
   const hit = (step: number, dur: number, vel: number, strum = 0) =>
     voicing.forEach((p, i) => out.push(noteAt(ctx, 'chords', p, vel, step + i * strum, dur)));
+  const hitAll = (steps: readonly number[], dur: number, vel: number, accented: number) => {
+    for (const s of steps) hit(s, dur, s % 4 === 0 ? accented : vel);
+  };
   switch (pattern) {
     case 'sustain':
       if (barInChord(ctx) === 0) hit(0, ctx.section.theme.chordBars * 4 - 0.1, 0.75);
       break;
     case 'stabs': {
       const tpl = STAB_TEMPLATES[new Rng(ctx.section.choices.drumSeed).fork('stabs').int(0, STAB_TEMPLATES.length - 1)] as number[];
-      for (const s of tpl) hit(s, 0.3, s % 4 === 0 ? 0.85 : 0.72);
+      hitAll(tpl, 0.3, 0.72, 0.85);
       break;
     }
     case 'pulse': {
@@ -50,6 +62,13 @@ export function generateChords(ctx: BarContext, mem: PartMemory): NoteEvent[] {
     case 'strum':
       hit(0, 2.6, 0.75, 0.12);
       if (ctx.macros.complexity > 0.4) hit(10, 1.4, 0.6, 0.1);
+      break;
+    case 'skank':
+      // reggae: short chops on beats 2 and 4, doubled when the music is busy
+      hitAll(ctx.macros.complexity > 0.55 ? [4, 6, 12, 14] : [4, 12], 0.22, 0.6, 0.78);
+      break;
+    case 'comp':
+      hitAll(ctx.rng.fork('comp').pick(COMP_TEMPLATES) as number[], 0.6, 0.62, 0.74);
       break;
   }
   return out;

@@ -14,6 +14,7 @@ import { generateArp, generateChords, generatePad } from './generators/harmony.j
 import { createMotif, generateLead, generateTexture } from './generators/melody.js';
 import { PART_IDS, partRecord, type PartId } from './parts.js';
 import type { Style } from './style.js';
+import { STYLES } from './styles.js';
 import { BEATS_PER_BAR } from './rhythm.js';
 import type { BarContext, Macros, NoteEvent, PartMemory, Section, SectionChoices, SectionKind, Theme } from './types.js';
 
@@ -28,6 +29,8 @@ export interface ComposerInputs {
   key(): number | null;
   /** scale, or null for "choose from the style" */
   scale(): ScaleName | null;
+  /** bars a style plays before the composer moves on to another one, or null to stay */
+  journey(): number | null;
 }
 
 export interface BarResult {
@@ -36,6 +39,8 @@ export interface BarResult {
   section: Section;
   /** true when this bar starts a new section */
   sectionStart: boolean;
+  /** the style the composer moved on to at this bar (its journey), else null */
+  styleChange: string | null;
   chord: Chord;
   /** true when the chord differs from the previous bar's */
   chordChange: boolean;
@@ -72,6 +77,14 @@ export class Composer {
   private lastChordKey = '';
   private queuedNext: SectionKind | null = null;
   private plannedNext: SectionKind | null = null;
+  /**
+   * The journey: a "piece" is the stretch played in one style. When it has run
+   * its course, the composer plays an outro and starts the next piece in a
+   * new style. `moved` holds that choice until the outside world adopts it
+   * (or picks another style itself).
+   */
+  private piece = { index: 0, startBar: 0, themeStart: 0, styleId: '', previousId: '' };
+  private moved: { from: string; to: Style } | null = null;
 
   constructor(seed: number, inputs: ComposerInputs) {
     this.inputs = inputs;
@@ -87,6 +100,26 @@ export class Composer {
 
   get currentSection(): Section | null {
     return this.section;
+  }
+
+  /** The style to compose in: the input's, unless the journey has just moved on from it. */
+  private currentStyle(): Style {
+    const style = this.inputs.style();
+    if (this.moved && this.moved.from !== style.id) this.moved = null;
+    return this.moved?.to ?? style;
+  }
+
+  /** Every new piece goes somewhere else: never the style it leaves, nor the one before that. */
+  private nextStyle(current: Style): Style {
+    const r = this.rng.fork(`journey:${this.piece.index}`);
+    const fresh = STYLES.filter((s) => s.id !== current.id && s.id !== this.piece.previousId);
+    return r.pick(fresh.length ? fresh : STYLES.filter((s) => s.id !== current.id));
+  }
+
+  private startPiece(startBar: number, style: Style, previousId: string): void {
+    this.piece = { index: this.piece.index + 1, startBar, themeStart: this.themes.length, styleId: style.id, previousId };
+    this.autoKey = this.rng.fork(`key:${this.piece.index}`).int(0, 11);
+    this.autoScale = null;
   }
 
   private scaleFor(style: Style): Scale {
@@ -121,27 +154,50 @@ export class Composer {
 
   private themeFor(kind: SectionKind, style: Style, macros: Macros, r: Rng): ThemeSeed {
     // Recurrence makes music: drops and grooves share theme A, breaks prefer theme B.
-    if (this.themes.length === 0) return this.newTheme(style, macros);
+    // Themes belong to a piece: a new style starts from fresh ideas.
+    const own = this.themes.slice(this.piece.themeStart);
+    if (own.length === 0) return this.newTheme(style, macros);
     if (r.chance(0.12 + 0.5 * macros.variation)) return this.newTheme(style, macros);
-    const a = this.themes[0] as ThemeSeed;
+    const a = own[0] as ThemeSeed;
     if (kind === 'break' || kind === 'intro') {
-      return this.themes[1] ?? (r.chance(0.7) ? this.newTheme(style, macros) : a);
+      return own[1] ?? (r.chance(0.7) ? this.newTheme(style, macros) : a);
     }
-    return r.chance(0.75) ? a : (r.pick(this.themes) as ThemeSeed);
+    return r.chance(0.75) ? a : (r.pick(own) as ThemeSeed);
   }
 
-  private planSection(startBar: number, style: Style, macros: Macros): Section {
+  /**
+   * Picks the next section's kind, and moves the journey on: a piece that has
+   * run its course ends with an outro, and the section after it starts the
+   * next piece in a new style. Returns the style the section is planned in.
+   */
+  private planKind(startBar: number, style: Style, r: Rng): { kind: SectionKind; style: Style } {
+    if (style.id !== this.piece.styleId) {
+      // the outside world chose this style: its piece starts now
+      this.piece = { ...this.piece, startBar, themeStart: this.themes.length, styleId: style.id };
+    }
+    if (this.queuedNext) {
+      const kind = this.queuedNext;
+      this.queuedNext = null;
+      return { kind, style };
+    }
+    if (!this.section) return { kind: style.form.start, style };
+    const bars = this.inputs.journey();
+    const due = bars !== null && startBar - this.piece.startBar >= bars;
+    if (due && this.section.kind === 'outro') {
+      const next = this.nextStyle(style);
+      // held until the outside world's style (not the composer's) changes
+      this.moved = { from: this.inputs.style().id, to: next };
+      this.startPiece(startBar, next, style.id);
+      return { kind: next.form.start, style: next };
+    }
+    if (due) return { kind: 'outro', style };
+    return { kind: this.plannedNext ?? r.weighted(style.form.transitions[this.section.kind]), style };
+  }
+
+  private planSection(startBar: number, current: Style, macros: Macros): Section {
     const index = this.sectionCount++;
     const r = this.rng.fork(`section:${index}`);
-    let kind: SectionKind;
-    if (this.queuedNext) {
-      kind = this.queuedNext;
-      this.queuedNext = null;
-    } else if (!this.section) {
-      kind = style.form.start;
-    } else {
-      kind = this.plannedNext ?? r.weighted(style.form.transitions[this.section.kind]);
-    }
+    const { kind, style } = this.planKind(startBar, current, r);
     const bars = Number(r.weighted(style.form.lengths[kind])) * (macros.variation > 0.7 && r.chance(0.4) ? 0.5 : 1);
     const energy = clamp(KIND_ENERGY[kind] * (0.45 + 1.1 * macros.energy), 0, 1);
     const seed = this.themeFor(kind, style, macros, r);
@@ -191,12 +247,18 @@ export class Composer {
   }
 
   composeBar(bar: number): BarResult {
-    const style = this.inputs.style();
+    let style = this.currentStyle();
     const macros = this.inputs.macros();
     let sectionStart = false;
+    let styleChange: string | null = null;
     if (!this.section || this.queuedNext || bar >= this.section.startBar + this.section.bars) {
       this.section = this.planSection(bar, style, macros);
       sectionStart = true;
+      const planned = this.currentStyle();
+      if (planned !== style) {
+        styleChange = planned.id;
+        style = planned;
+      }
     }
     const sec = this.section;
     const barInSection = bar - sec.startBar;
@@ -242,6 +304,6 @@ export class Composer {
     if (on('lead')) events.push(...generateLead(ctx, m.lead));
     if (on('texture')) events.push(...generateTexture(ctx));
     events.sort((a, b) => a.start - b.start);
-    return { bar, events, section: sec, sectionStart, chord, chordChange, scale };
+    return { bar, events, section: sec, sectionStart, styleChange, chord, chordChange, scale };
   }
 }

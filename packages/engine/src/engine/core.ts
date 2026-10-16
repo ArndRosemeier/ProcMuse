@@ -19,7 +19,7 @@ import { PITCH_CLASS_NAMES } from '../theory/pitch.js';
 import { SCALE_LABELS, type ScaleName } from '../theory/scale.js';
 import { CHORD_NAME } from './chordName.js';
 import type { EngineEvent } from './events.js';
-import { DELAY_BEATS, P, buildParamSpecs, seedFrom, styleDefaults } from './paramSpecs.js';
+import { DELAY_BEATS, JOURNEY_BARS, P, buildParamSpecs, seedFrom, styleDefaults, type JourneyPace } from './paramSpecs.js';
 import { EventQueue, ItemKind, type QueueItem } from './queue.js';
 
 export type EngineCommand =
@@ -53,6 +53,8 @@ export class EngineCore {
   private macrosDirty = true;
   private inputs: ComposerInputs;
   private applyingStyle = false;
+  /** true while the composer's own journey changes the style (it has already planned the new section) */
+  private journeyMove = false;
 
   constructor(options: EngineCoreOptions) {
     if (!(options.sampleRate >= 8000 && options.sampleRate <= 384000)) {
@@ -80,6 +82,7 @@ export class EngineCore {
         const s = params.string(P.scale);
         return s === 'auto' ? null : (s as ScaleName);
       },
+      journey: () => JOURNEY_BARS[params.string(P.journey) as JourneyPace],
     };
     this.composer = new Composer(params.number(P.seed), this.inputs);
     PART_IDS.forEach((p, i) => this.loadInstrument(p, i));
@@ -170,8 +173,10 @@ export class EngineCore {
       } finally {
         this.applyingStyle = false;
       }
-      this.composer.queueSection(null);
-      this.dropFutureNotes();
+      if (!this.journeyMove) {
+        this.composer.queueSection(null);
+        this.dropFutureNotes();
+      }
     } else if (id === P.seed) {
       this.restartComposer();
     } else if (id.endsWith('.instrument')) {
@@ -181,6 +186,17 @@ export class EngineCore {
       const part = id.split('.')[1] as PartId;
       this.queue.filter((it) => !(it.part === PART_INDEX[part] && it.kind === ItemKind.On));
     }
+  }
+
+  /** The composer moved on to a new style at this bar line: adopt it (instruments, tempo, mix) and announce it. */
+  private adoptJourneyStyle(id: string): void {
+    this.journeyMove = true;
+    try {
+      this.params.set(P.style, id);
+    } finally {
+      this.journeyMove = false;
+    }
+    this.emit({ type: 'param', id: P.style, value: id });
   }
 
   /** Drops not-yet-started notes after the current bar so new material starts at the next bar line. */
@@ -230,6 +246,9 @@ export class EngineCore {
       const bar = this.nextBarToCompose++;
       const res = this.composer.composeBar(bar);
       const startBeat = bar * BEATS_PER_BAR;
+      // markers run before the bar's first notes, so the new style's instruments play them
+      const moveTo = res.styleChange;
+      if (moveTo) this.pushMarker(startBeat, () => this.adoptJourneyStyle(moveTo));
       if (res.sectionStart) {
         const s = res.section;
         this.pushMarker(startBeat, () =>

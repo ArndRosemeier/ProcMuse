@@ -71,10 +71,22 @@ export function generateBass(ctx: BarContext, mem: PartMemory): NoteEvent[] {
         add(root, 0.7, b * 4 + 3, 0.15);
       }
       break;
+    case 'octave':
+      // disco: eighths jumping between the root and its octave
+      for (let s = 0; s < 16; s += 2) add(s % 4 === 0 ? root : octave, s % 4 === 0 ? 0.95 : 0.8, s, 0.35);
+      break;
+    case 'riddim':
+      // reggae: a heavy root, a rest on beat 2, then a phrase that answers it
+      add(root, 1, 0, 1.4);
+      add(complexity > 0.5 ? third : fifth, 0.75, 7, 0.4);
+      add(fifth, 0.85, 8, 0.9);
+      add(lastBarOfChord ? ctx.scale.quantize(nextRoot + (nextRoot > root ? -1 : 1)) : octave, 0.7, 12, 0.6);
+      if (complexity > 0.6) add(fifth, 0.6, 14, 0.4);
+      break;
   }
 
   // approach note into the next chord
-  if (lastBarOfChord && nextRoot !== root && complexity > 0.45 && pattern !== 'walk' && pattern !== 'long' && ctx.rng.chance(complexity)) {
+  if (lastBarOfChord && nextRoot !== root && complexity > 0.45 && pattern !== 'walk' && pattern !== 'long' && pattern !== 'riddim' && ctx.rng.chance(complexity)) {
     const filtered = out.filter((e) => e.start < ctx.startBeat + 3.5);
     out.length = 0;
     out.push(...filtered);

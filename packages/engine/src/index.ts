@@ -15,7 +15,7 @@ export type {
   LevelsEventMsg,
   ParamEventMsg,
 } from './engine/events.js';
-export { P, SEED_LIMIT, buildParamSpecs, seedFrom, styleDefaults } from './engine/paramSpecs.js';
+export { JOURNEY_BARS, P, SEED_LIMIT, buildParamSpecs, seedFrom, styleDefaults, type JourneyPace } from './engine/paramSpecs.js';
 export {
   ParamStore,
   validateParamValue,

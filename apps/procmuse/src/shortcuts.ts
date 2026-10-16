@@ -18,9 +18,12 @@ export function registerShortcuts(ws: Workspace, engine: WebEngine): void {
   s.register({ key: 'b', keyLabel: 'B', description: 'Breakdown now', run: () => engine.command({ type: 'nextSection', kind: 'break' }) });
   s.register({ key: '+', keyLabel: '+', description: 'More energy', run: () => nudge(0.05) });
   s.register({ key: '-', keyLabel: '−', description: 'Less energy', run: () => nudge(-0.05) });
-  STYLES.forEach((style, i) =>
-    s.register({ key: String(i + 1), keyLabel: String(i + 1), description: `Style: ${style.name}`, run: () => engine.set(P.style, style.id) }),
-  );
+  const stepStyle = (delta: number) => {
+    const i = STYLES.findIndex((x) => x.id === engine.get(P.style));
+    engine.set(P.style, (STYLES[(i + delta + STYLES.length) % STYLES.length] as (typeof STYLES)[number]).id);
+  };
+  s.register({ key: '[', keyLabel: '[', description: 'Previous style', run: () => stepStyle(-1) });
+  s.register({ key: ']', keyLabel: ']', description: 'Next style', run: () => stepStyle(1) });
   s.register({ key: 'h', keyLabel: 'H', description: 'Hide or show the interface', run: () => ws.toggleAll() });
   s.register({ key: 'l', keyLabel: 'L', description: 'Reset the panel layout', run: () => ws.resetLayout() });
   s.register({ key: '?', keyLabel: '?', description: 'Show this help', run: () => ws.shortcuts.openHelp() });

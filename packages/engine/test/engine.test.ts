@@ -5,6 +5,7 @@ import { renderOffline } from '../src/render/offline.js';
 import { MusicStateTracker } from '../src/state/tracker.js';
 import { encodeWav } from '../src/render/wav.js';
 import type { EngineEvent } from '../src/engine/events.js';
+import { getStyle } from '../src/compose/styles.js';
 
 const SR = 22050;
 
@@ -67,6 +68,46 @@ describe('EngineCore', () => {
     expect(core.params.number('music.tempo')).toBe(82);
     expect(core.params.string('part.chords.instrument')).toBe('keys-epiano');
     expect(events.some((e) => e.type === 'param' && e.id === 'music.tempo')).toBe(true);
+  });
+
+  it('moves on to a new style by itself, adopting its defaults at a bar line and announcing it', () => {
+    const core = new EngineCore({ sampleRate: 8000, params: { 'music.journey': 'often', 'music.seed': 5 } });
+    const events: EngineEvent[] = [];
+    const times: number[] = [];
+    core.setListener((e) => {
+      events.push(e);
+      times.push(core.time);
+    });
+    // 32 bars of demoscene at 120 BPM plus its outro: well under 100 seconds
+    for (let i = 0; i < 100 && !events.some((e) => e.type === 'param' && e.id === 'music.style'); i++) {
+      core.process(new Float32Array(8000), new Float32Array(8000));
+    }
+    const move = events.find((e) => e.type === 'param' && e.id === 'music.style');
+    expect(move).toBeDefined();
+    const id = (move as { value: string }).value;
+    expect(id).not.toBe('demoscene');
+    expect(core.params.string('music.style')).toBe(id);
+    expect(core.params.number('music.tempo')).toBe(getStyle(id).tempo.default);
+    expect(core.params.string('part.lead.instrument')).toBe(getStyle(id).parts.lead.instrument);
+    // it lands on a bar line: a bar's first beat sounds at the same moment
+    const at = times[events.indexOf(move as EngineEvent)];
+    expect(events.some((e) => e.type === 'beat' && e.beat === 0 && e.time === at)).toBe(true);
+  });
+
+  it('never moves on when style changes are off', () => {
+    const core = new EngineCore({ sampleRate: 8000, params: { 'music.journey': 'never' } });
+    for (let i = 0; i < 100; i++) core.process(new Float32Array(8000), new Float32Array(8000));
+    expect(core.params.string('music.style')).toBe('demoscene');
+  });
+
+  it('a new instrument lets the old one ring out instead of cutting its notes', () => {
+    const core = new EngineCore({ sampleRate: SR, params: { 'part.pad.mode': 'on' } });
+    core.process(new Float32Array(SR * 2), new Float32Array(SR * 2));
+    const mixer = (core as unknown as { mixer: { voiceCount: number; channels: { retiring: unknown }[] } }).mixer;
+    core.setParam('part.pad.instrument', 'pad-choir');
+    expect(mixer.channels[6]?.retiring).not.toBeNull();
+    core.process(new Float32Array(SR * 8), new Float32Array(SR * 8));
+    expect(mixer.channels[6]?.retiring).toBeNull();
   });
 
   it('a muted part stops sounding at once', () => {

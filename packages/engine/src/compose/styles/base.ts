@@ -63,6 +63,39 @@ export const DEFAULT_FORM: Style['form'] = {
   },
 };
 
+/** No builds or drops: a steady groove with breaks, for laid-back styles (lo-fi, jazz, bossa). */
+export const GROOVE_FORM: Style['form'] = {
+  ...DEFAULT_FORM,
+  transitions: {
+    ...DEFAULT_FORM.transitions,
+    intro: { groove: 3 },
+    groove: { break: 2, groove: 1, drop: 1 },
+    drop: { groove: 2, break: 1 },
+    break: { groove: 3 },
+  },
+};
+
+/** Long, slow sections that drift between groove and break, for ambient and sacred styles. */
+export const DRIFT_FORM: Style['form'] = {
+  start: 'intro',
+  transitions: {
+    intro: { groove: 2, break: 1 },
+    build: { groove: 2 },
+    drop: { groove: 1, break: 1 },
+    groove: { break: 2, groove: 1, build: 0.5 },
+    break: { groove: 2, intro: 0.5 },
+    outro: { intro: 1 },
+  },
+  lengths: {
+    intro: { '16': 1 },
+    build: { '8': 1 },
+    drop: { '16': 1 },
+    groove: { '16': 2, '32': 1 },
+    break: { '16': 1 },
+    outro: { '16': 1 },
+  },
+};
+
 const z = 0;
 /** Grids are written as four beats of four 16ths. */
 export const G = {

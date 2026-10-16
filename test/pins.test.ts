@@ -6,6 +6,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { BUILTIN_STYLES } from '../packages/engine/src/compose/styles/builtin.js';
 
 const ROOT = join(__dirname, '..');
 
@@ -42,7 +43,8 @@ describe('pins', () => {
 
   it('styles are data: style files declare no classes, and generators never branch on a style id', () => {
     expect(grep(files(join(ROOT, 'packages/engine/src/compose/styles')), /\bclass\s/)).toEqual([]);
-    expect(grep(files(join(ROOT, 'packages/engine/src/compose/generators')), /style\.id\b|'(demoscene|synthwave|techno|house|lofi|ambient|trance)'/)).toEqual([]);
+    const ids = BUILTIN_STYLES.map((st) => st.id).join('|');
+    expect(grep(files(join(ROOT, 'packages/engine/src/compose/generators')), new RegExp(`style\\.id\\b|'(${ids})'`))).toEqual([]);
   });
 
   it('swing and humanize are applied in exactly one place (compose/rhythm.ts)', () => {

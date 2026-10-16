@@ -5,7 +5,9 @@ The state of record; one screen, overwritten in place. Reconcile with `bash scri
 ```
 reconciled: SEE_GIT · 2026-10-16
 
-SESSION | id=claude-projects thread "random seed on start" | state=landed: fresh seed per start (ledger 15)
+SESSION | id=claude-projects thread "Many more music styles" | state=landed: 19 styles + automatic style changes (ledger 16)
+
+LANDED | ledger=16 | 12 new styles over the whole instrument panel, and the journey (Style changes, default Sometimes) moves between styles by itself (gate GREEN, e2e GREEN)
 
 LANDED | ledger=15 | fresh seed on every app start; share links and the Seed control still pin one (gate GREEN, e2e GREEN)
 
@@ -15,7 +17,7 @@ LANDED | ledger=13 | phone layout: one sheet above a full-width dock, touch sizi
 
 LANDED | ledger=12 | wow-factor instruments: horns, bells, organs, bagpipes, choir, taiko, gong (gate GREEN, e2e GREEN)
 
-QUEUE | row=8 | listening pass on mix balance and patches, incl. the 16 new ones (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
+QUEUE | row=8 | listening pass on mix balance and patches, incl. the 16 new ones and the 12 new styles (needs the owner's ears) | src=docs/ARCHITECTURE.md#known-debt
 QUEUE | row=9 | sample-based instruments (piano, strings, voice) as an OscSpec type | src=ledger row 3
 QUEUE | row=10 | publish @procmuse/engine to npm (build dist, versioning) | src=README.md
 
