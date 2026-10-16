@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EngineCore } from '../src/engine/core.js';
+import { P, SEED_LIMIT, buildParamSpecs, seedFrom } from '../src/engine/paramSpecs.js';
 import { renderOffline } from '../src/render/offline.js';
 import { MusicStateTracker } from '../src/state/tracker.js';
 import { encodeWav } from '../src/render/wav.js';
@@ -91,6 +92,19 @@ describe('EngineCore', () => {
     const l = new Float32Array(SR * 2);
     core.process(l, new Float32Array(SR * 2));
     expect(stats(l, l).rms).toBeGreaterThan(0.01);
+  });
+
+  it('seedFrom maps any 32-bit number into the Seed control range', () => {
+    const spec = buildParamSpecs().find((s) => s.id === P.seed);
+    if (spec?.kind !== 'number') throw new Error('seed spec missing');
+    expect(spec.min).toBe(0);
+    expect(spec.max).toBe(SEED_LIMIT - 1);
+    for (const n of [0, 1, SEED_LIMIT - 1, SEED_LIMIT, 0xffffffff, -1, 4096]) {
+      const seed = seedFrom(n);
+      expect(Number.isInteger(seed) && seed >= spec.min && seed <= spec.max).toBe(true);
+    }
+    const core = new EngineCore({ sampleRate: SR, params: { [P.seed]: seedFrom(0xdeadbeef) } });
+    expect(core.params.number(P.seed)).toBe(seedFrom(0xdeadbeef));
   });
 
   it('nextSection starts a new section at the next bar', () => {

@@ -19,7 +19,7 @@ import { PITCH_CLASS_NAMES } from '../theory/pitch.js';
 import { SCALE_LABELS, type ScaleName } from '../theory/scale.js';
 import { CHORD_NAME } from './chordName.js';
 import type { EngineEvent } from './events.js';
-import { DELAY_BEATS, P, buildParamSpecs, styleDefaults } from './paramSpecs.js';
+import { DELAY_BEATS, P, buildParamSpecs, seedFrom, styleDefaults } from './paramSpecs.js';
 import { EventQueue, ItemKind, type QueueItem } from './queue.js';
 
 export type EngineCommand =
@@ -115,7 +115,7 @@ export class EngineCore {
   command(cmd: EngineCommand): void {
     switch (cmd.type) {
       case 'regenerate': {
-        const seed = cmd.seed ?? (hash32(String(this.frames), this.params.number(P.seed)) % 1000000);
+        const seed = cmd.seed ?? seedFrom(hash32(String(this.frames), this.params.number(P.seed)));
         this.params.set(P.seed, seed); // onParam restarts the composer
         break;
       }

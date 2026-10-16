@@ -15,6 +15,18 @@ export const DELAY_BEATS: Record<(typeof DELAY_DIVISIONS)[number], number> = {
   '1/2': 2,
 };
 
+/** Seeds are whole numbers in [0, SEED_LIMIT). */
+export const SEED_LIMIT = 1_000_000;
+
+/**
+ * The one way to turn any 32-bit number into a valid seed. The engine feeds
+ * it a hash (New idea stays deterministic); a host feeds it real entropy so
+ * each fresh start composes something new.
+ */
+export function seedFrom(entropy: number): number {
+  return (entropy >>> 0) % SEED_LIMIT;
+}
+
 /** Param ids, so no other module spells them by hand. */
 export const P = {
   style: 'music.style',
@@ -67,10 +79,10 @@ export function buildParamSpecs(): ParamSpec[] {
       kind: 'number',
       id: P.seed,
       label: 'Seed',
-      description: 'The random seed. The same seed and settings always produce the same music.',
+      description: 'The random seed. The same seed and settings always produce the same music. A fresh start picks a new one.',
       group: 'Music',
       min: 0,
-      max: 999999,
+      max: SEED_LIMIT - 1,
       step: 1,
       default: 4096,
     },

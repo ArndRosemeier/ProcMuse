@@ -19,6 +19,7 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Seam | The ONE way | Where | Pinned by |
 | --- | --- | --- | --- |
 | Randomness | `Rng` (+ `fork(label)` for stable independent streams) | `packages/engine/src/core/rng.ts` | `pins: randomness` (no `Math.random` in engine) |
+| A seed (any number → valid seed) | `seedFrom(entropy)` / `SEED_LIMIT`; the app's fresh start feeds it `crypto.getRandomValues`, New idea feeds it a hash | `packages/engine/src/engine/paramSpecs.ts` | `pins: the seed range`, `engine.test: seedFrom` |
 | A controllable value | `ParamSpec` declared in `buildParamSpecs()`; ids via `P` | `packages/engine/src/engine/paramSpecs.ts` | `pins: param ids` |
 | Binding UI to values | `ParamSource` interface (ParamStore, WebEngine implement it) | `packages/engine/src/core/params.ts` | — |
 | Param → widget | `createControl(spec, source)` | `packages/ui/src/controls.ts` | `ui.test: every engine parameter becomes a named, described control` |

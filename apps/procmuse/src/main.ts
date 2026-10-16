@@ -2,7 +2,7 @@
  * ProcMuse app: a start screen, then the engine in an AudioWorklet, the
  * visuals on the canvas, and the floating control workspace on top.
  */
-import { P, getStyle, type EngineEvent } from '@procmuse/engine';
+import { P, getStyle, seedFrom, type EngineEvent } from '@procmuse/engine';
 import { Workspace, browserStore, captureGlobalErrors, h } from '@procmuse/ui';
 import { WebEngine } from '@procmuse/web';
 import processorUrl from '@procmuse/web/processor?worker&url';
@@ -49,8 +49,13 @@ function startScreen(onStart: () => Promise<void>): void {
   button.focus();
 }
 
+/** Each fresh start composes a new piece; a shared link below still restores its own seed. */
+function freshSeed(): number {
+  return seedFrom(crypto.getRandomValues(new Uint32Array(1))[0] as number);
+}
+
 async function start(): Promise<void> {
-  const engine = await WebEngine.create({ processorUrl });
+  const engine = await WebEngine.create({ processorUrl, params: { [P.seed]: freshSeed() } });
   const ws = new Workspace(host, { store, label: 'ProcMuse controls' });
   captureGlobalErrors(ws.errors);
   engine.on('error', (err) => ws.errors.show(err, 'Audio engine'));

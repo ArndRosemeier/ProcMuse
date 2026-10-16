@@ -15,7 +15,7 @@ export type {
   LevelsEventMsg,
   ParamEventMsg,
 } from './engine/events.js';
-export { P, buildParamSpecs, styleDefaults } from './engine/paramSpecs.js';
+export { P, SEED_LIMIT, buildParamSpecs, seedFrom, styleDefaults } from './engine/paramSpecs.js';
 export {
   ParamStore,
   validateParamValue,

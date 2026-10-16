@@ -57,6 +57,12 @@ describe('pins', () => {
     expect(grep(src('engine'), /\b(window|document|AudioContext|AudioWorkletNode|setTimeout|setInterval|requestAnimationFrame)\b/)).toEqual([]);
   });
 
+  it('the seed range is spelled only in engine/paramSpecs.ts (everyone else uses seedFrom / SEED_LIMIT)', () => {
+    const all = ['engine', 'web', 'ui', 'visuals'].flatMap((pkg) => src(pkg)).concat(files(join(ROOT, 'apps/procmuse/src')));
+    const offenders = grep(all, /\b(999_?999|1_?000_?000)\b/).filter((p) => !p.endsWith('engine/paramSpecs.ts'));
+    expect(offenders).toEqual([]);
+  });
+
   it('param ids are spelled only in engine/paramSpecs.ts (everyone else uses P)', () => {
     const offenders = grep(src('engine'), /['"`](music|sound|fx|master)\.[a-zA-Z]+['"`]/).filter((p) => !p.endsWith('engine/paramSpecs.ts'));
     expect(offenders).toEqual([]);

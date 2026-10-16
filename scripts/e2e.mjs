@@ -170,6 +170,22 @@ try {
   console.log(`      screenshot: ${opt.screenshot}`);
   await page.close();
 
+  // each fresh start composes something new; a share link still pins its seed
+  const seedOf = async (url) => {
+    const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await p.goto(url);
+    await p.getByRole('button', { name: 'Start the music' }).click();
+    await p.waitForSelector('.pm-root', { timeout: 15000 });
+    const seed = await p.getByRole('slider', { name: 'Seed', exact: true }).getAttribute('aria-valuetext');
+    await p.close();
+    return seed;
+  };
+  const freshSeeds = [await seedOf(`http://127.0.0.1:${port}/`), await seedOf(`http://127.0.0.1:${port}/`)];
+  check(freshSeeds[0] !== freshSeeds[1], `two fresh starts pick different seeds (${freshSeeds.join(', ')})`);
+  const shareLink = Buffer.from(JSON.stringify({ 'music.seed': 1234 })).toString('base64url');
+  const sharedSeed = await seedOf(`http://127.0.0.1:${port}/#p=${shareLink}`);
+  check(/\b1234\b/.test(sharedSeed ?? ''), `a share link restores its seed (${sharedSeed})`);
+
   // a phone: touch, portrait then landscape (shots land next to the main screenshot)
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
   const phoneErrors = watchErrors(phone);

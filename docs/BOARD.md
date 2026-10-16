@@ -3,9 +3,11 @@
 The state of record; one screen, overwritten in place. Reconcile with `bash scripts/board.sh`.
 
 ```
-reconciled: SEE_GIT · 2026-10-15
+reconciled: SEE_GIT · 2026-10-16
 
-SESSION | id=claude-projects thread "motorbike visualization" | state=landed: Dusk ride scene (ledger 14)
+SESSION | id=claude-projects thread "random seed on start" | state=landed: fresh seed per start (ledger 15)
+
+LANDED | ledger=15 | fresh seed on every app start; share links and the Seed control still pin one (gate GREEN, e2e GREEN)
 
 LANDED | ledger=14 | Dusk ride scene: fast motorbike ride, wireframe mountains and palms, mirror road (gate GREEN, e2e GREEN)
 
