@@ -5,7 +5,9 @@ The state of record; one screen, overwritten in place. Reconcile with `bash scri
 ```
 reconciled: SEE_GIT · 2026-10-16
 
-SESSION | id=claude-projects thread "Many more music styles" | state=landed: 19 styles + automatic style changes (ledger 16)
+SESSION | id=claude-projects thread "Title screen horizontal scroll" | state=landed: start screen title fits its card (ledger 17)
+
+LANDED | ledger=17 | start screen: no horizontal scroll bar, the title sizes to its card on desktop and phone (gate GREEN, e2e GREEN)
 
 LANDED | ledger=16 | 12 new styles over the whole instrument panel, and the journey (Style changes, default Sometimes) moves between styles by itself (gate GREEN, e2e GREEN)
 

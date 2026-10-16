@@ -89,6 +89,17 @@ const phoneLayout = (page) =>
     };
   });
 
+/** The start screen fits the screen: no page scroll, and nothing wider than its card (the card scrolls, so that would be a scroll bar). */
+const startFits = (page) =>
+  page.evaluate(() => {
+    const card = document.querySelector('.pm-start-card');
+    const title = document.createRange();
+    title.selectNodeContents(card.querySelector('h1'));
+    const box = card.getBoundingClientRect();
+    const word = title.getBoundingClientRect();
+    return document.documentElement.scrollWidth <= innerWidth && card.scrollWidth <= card.clientWidth && box.left >= 0 && box.right <= innerWidth && word.width <= box.width;
+  });
+
 const failures = [];
 const check = (ok, what) => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${what}`);
@@ -102,6 +113,7 @@ try {
   const start = page.getByRole('button', { name: 'Start the music' });
   check(await start.isVisible(), 'start button is visible and named');
   check(await page.evaluate(() => document.activeElement?.textContent === 'Start the music'), 'start button has focus');
+  check(await startFits(page), 'the start screen fits the width, no horizontal scroll bar');
   await start.click();
   await page.waitForSelector('.pm-root', { timeout: 15000 });
   await page.waitForTimeout(opt.seconds * 1000);
@@ -190,7 +202,7 @@ try {
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
   const phoneErrors = watchErrors(phone);
   await phone.goto(`http://127.0.0.1:${port}/`);
-  check(!(await phone.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'phone: the start screen fits the width');
+  check(await startFits(phone), 'phone: the start screen fits the width, no horizontal scroll bar');
   await phone.getByRole('button', { name: 'Start the music' }).tap();
   await phone.waitForSelector('.pm-root', { timeout: 15000 });
   await phone.waitForTimeout(3000);

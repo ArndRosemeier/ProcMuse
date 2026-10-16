@@ -26,7 +26,12 @@ html, body {
   background: radial-gradient(ellipse at center, rgb(40 10 80 / 0.55), rgb(2 1 8 / 0.92));
 }
 .pm-start-card {
-  max-width: min(34rem, calc(100vw - 32px));
+  /* a definite width (padding included) so the title can size against it: the
+     card scrolls vertically on short screens, which makes overflow-x auto too,
+     so anything wider than the card shows a horizontal scroll bar */
+  box-sizing: border-box;
+  width: min(40rem, calc(100vw - 32px));
+  container-type: inline-size;
   max-height: 100dvh;
   overflow-y: auto;
   text-align: center;
@@ -34,7 +39,8 @@ html, body {
 }
 .pm-start h1 {
   margin: 0 0 0.3em;
-  font-size: clamp(2.6rem, 9vw, 5rem);
+  /* the spaced-out word is about 8.2em wide: 11.5cqi keeps it inside the card */
+  font-size: min(5rem, 11.5cqi);
   letter-spacing: 0.35em;
   text-indent: 0.35em;
   font-weight: 800;
