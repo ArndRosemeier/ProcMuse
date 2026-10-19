@@ -28,9 +28,10 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 | Decay time ("falls 60 dB in T seconds") | `t60Gain` | `packages/engine/src/core/math.ts` | `instruments.test: fades one oscillator on its own clock` |
 | An instrument's body (fixed resonant peaks) | `Patch.formant`, rendered by `Voice` | `instruments/patch.ts`, `instruments/voice.ts` | `instruments.test: formant peaks are unity gain` |
 | A recorded instrument | a `Patch` with a `sample` oscillator, rendered by the same `Voice` (`dsp/sampler.ts` plays a zone) | `instruments/patches/recorded.ts`, `dsp/sampler.ts` | `samples.test` |
-| Recordings into the engine | a validated `SampleSet` in the engine's `SampleBank` (`EngineCore.addSamples`, `WebEngine.addSamples`); the engine never fetches or decodes | `instruments/samples.ts` | `samples.test: is loud about missing…` |
-| Sample files → SampleSet | `parseSampleIndex` + `sampleSetFromPcm` (browser and Node share them) | `instruments/sampleIndex.ts` | `samples.test: the shipped sample files` |
-| Downloading and keeping recordings | `SampleLibrary` (fetch, Cache Storage, decode at the files' own rate) | `packages/web/src/sampleLibrary.ts` | e2e: a collection plays after one press |
+| Recordings into the engine | a validated `SampleSet` in the engine's `SampleBank` (`EngineCore.addSamples`, `WebEngine.addSamples`); the engine never fetches (it decodes only through `sampleSetFromFile`) | `instruments/samples.ts` | `samples.test: is loud about missing…` |
+| Sample files → SampleSet | `parseSampleIndex` + `sampleSetFromFile` (decode, check rate/mono/length, slice via `sampleSetFromPcm`); browser and Node share them | `instruments/sampleIndex.ts` | `samples.test: the shipped sample files` |
+| Decoding a recording file | `decodeFlac`, the engine's own pure decoder (CRC-checked frames, MD5 when present), never the browser's `decodeAudioData` (Safari on iPad cannot decode FLAC) | `instruments/flac.ts` | `flac.test`, `pins: recording files are decoded only by the engine`, e2e: a collection plays with the browser decoder refusing FLAC |
+| Downloading and keeping recordings | `SampleLibrary` (fetch, Cache Storage, decode through `sampleSetFromFile`) | `packages/web/src/sampleLibrary.ts` | e2e: a collection plays after one press |
 | Building the recordings | `scripts/samples/build.mjs` over a pinned VSCO-2-CE checkout (`sources.mjs`): trim, verify pitch, loop, level, FLAC | `scripts/samples/` | `samples.test: the shipped sample files` |
 | Which instrument plays each part | `castBand` (style's synth patch, or a collection's recorded one by the Real instruments amount) — the engine AND the app's panel call it | `compose/collection.ts` | `samples.test: collections and casting` |
 | A collection | `Collection` data validated by `validateCollection` | `compose/collections/builtin.ts` | `pins: instruments are data` |
@@ -109,4 +110,8 @@ Engine internals (`packages/engine/src`): `core/` (rng, params, errors, math, em
 - Recorded instruments use one velocity layer and mono files to keep downloads small
   (17.6 MB for all 29); the zone format already carries velocity layers.
 - Recorded levels were matched by measurement against the synth patches, not by ear.
+- The shipped FLAC files carry no length or MD5 in their header (`build.mjs` lets ffmpeg
+  write to a pipe, which cannot seek back); `decodeFlac` reads such streams to the end,
+  and the per-frame CRCs plus the index's frame count check them. Writing to a file
+  would add the MD5, but changes every file's hash, so it waits for the next sample rebuild.
 - Meter is fixed at 4/4.

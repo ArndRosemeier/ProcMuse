@@ -45,11 +45,13 @@ export type { Patch, PatchCategory } from './instruments/patch.js';
 export { validateSampleSet, type SampleSet, type SampleZone } from './instruments/samples.js';
 export {
   parseSampleIndex,
+  sampleSetFromFile,
   sampleSetFromPcm,
   type SampleIndex,
   type SampleIndexEntry,
   type SampleIndexZone,
 } from './instruments/sampleIndex.js';
+export { decodeFlac, type FlacAudio } from './instruments/flac.js';
 export {
   COLLECTIONS,
   NO_COLLECTION,

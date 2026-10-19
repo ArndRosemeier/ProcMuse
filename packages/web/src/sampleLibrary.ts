@@ -4,14 +4,17 @@
  * The files live next to the app (built by scripts/samples/build.mjs): an
  * index.json and one mono FLAC per sample set, named by content hash. A
  * collection is downloaded once and kept in the browser's Cache Storage, so the
- * next visit loads it from disk. Every failure (network, a damaged file, a
- * decode that does not match the index) is a loud ProcMuseError.
+ * next visit loads it from disk. The engine's own FLAC decoder turns the bytes
+ * into audio (`sampleSetFromFile`), not the browser's `decodeAudioData`: Safari
+ * on iPad cannot decode FLAC, and the same decoder everywhere gives the same
+ * samples everywhere. Every failure (network, a damaged file, a decode that does
+ * not match the index) is a loud ProcMuseError.
  */
 import {
   ProcMuseError,
   collectionSampleSets,
   parseSampleIndex,
-  sampleSetFromPcm,
+  sampleSetFromFile,
   type SampleIndex,
   type SampleSet,
 } from '@procmuse/engine';
@@ -78,21 +81,11 @@ export class SampleLibrary {
       return { id, bytes };
     });
     report();
-    // decode at the files' own rate: no resampling, so loop points stay exact
-    const ctx = new OfflineAudioContext(1, 1, index.sampleRate);
     const sets: SampleSet[] = [];
     for (const { id, bytes } of files) {
-      let audio: AudioBuffer;
-      try {
-        audio = await ctx.decodeAudioData(bytes);
-      } catch (err) {
-        throw new ProcMuseError('invalid-samples', `the recording ${id} could not be decoded (${(err as Error).message})`);
-      }
-      if (audio.sampleRate !== index.sampleRate) {
-        throw new ProcMuseError('invalid-samples', `${id} decoded at ${audio.sampleRate} Hz, expected ${index.sampleRate}`);
-      }
-      // a copy the library owns, so it can be handed (transferred) to the audio thread
-      sets.push(sampleSetFromPcm(index, id, audio.getChannelData(0).slice()));
+      // a breath between files keeps the page responsive while a collection decodes
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      sets.push(sampleSetFromFile(index, id, bytes));
     }
     return sets;
   }

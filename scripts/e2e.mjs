@@ -108,6 +108,10 @@ const check = (ok, what) => {
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const consoleErrors = watchErrors(page);
+  // like Safari on iPad, this browser cannot decode FLAC: recordings must not need it
+  await page.addInitScript(() => {
+    BaseAudioContext.prototype.decodeAudioData = () => Promise.reject(new DOMException('Decoding audio data failed', 'EncodingError'));
+  });
   await page.goto(`http://127.0.0.1:${port}/`);
 
   const start = page.getByRole('button', { name: 'Start the music' });
@@ -178,7 +182,7 @@ try {
   const errorsAfterSwitch = await page.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
   check(errorsAfterSwitch.length === 0 && consoleErrors.length === 0, `switching to the bagpipes raises no errors ${JSON.stringify([...errorsAfterSwitch, ...consoleErrors].slice(0, 5))}`);
 
-  // a recorded collection downloads with one press, decodes in the browser and plays
+  // a recorded collection downloads with one press, decodes (without the browser's decoder) and plays
   await page.locator('.pm-dock').getByRole('button', { name: 'Instruments', exact: true }).click();
   const percussion = page.locator('.pm-collection', { hasText: 'Orchestral Percussion' }).getByRole('button');
   await page.waitForFunction(() => /MB/.test(document.querySelector('.pm-collections')?.textContent ?? ''), null, { timeout: 15000 });
@@ -195,7 +199,7 @@ try {
     { timeout: 60000 },
   );
   const castText = await page.locator('.pm-cast').textContent();
-  check(/^Recorded now: .+/.test(castText ?? ''), `the collection plays after one press: ${castText}`);
+  check(/^Recorded now: .+/.test(castText ?? ''), `the collection plays after one press, with the browser's audio decoder refusing FLAC: ${castText}`);
   await page.waitForTimeout(2000);
   const errorsAfterCollection = await page.$$eval('.pm-error', (els) => els.map((e) => e.textContent));
   check(errorsAfterCollection.length === 0 && consoleErrors.length === 0, `recorded instruments play without errors ${JSON.stringify([...errorsAfterCollection, ...consoleErrors].slice(0, 5))}`);

@@ -9,7 +9,7 @@ import { P } from '../src/engine/paramSpecs.js';
 import { Instrument } from '../src/instruments/instrument.js';
 import { patchSampleSets, validatePatch, type Patch } from '../src/instruments/patch.js';
 import { RECORDED_PATCHES, getPatch } from '../src/instruments/registry.js';
-import { parseSampleIndex, sampleSetFromPcm } from '../src/instruments/sampleIndex.js';
+import { parseSampleIndex, sampleSetFromFile, sampleSetFromPcm } from '../src/instruments/sampleIndex.js';
 import { SampleBank, pickZone, validateSampleSet, type SampleSet } from '../src/instruments/samples.js';
 import { renderOffline } from '../src/render/offline.js';
 import { midiToFreq } from '../src/theory/pitch.js';
@@ -197,6 +197,22 @@ describe('the shipped sample files', () => {
       expect(statSync(path).size).toBe(e.bytes);
     }
     for (const c of COLLECTIONS) for (const s of collectionSampleSets(c.id)) expect(index.sets[s]).toBeDefined();
+  });
+
+  it('every file decodes with the engine\'s own decoder into the zones its index lists (no browser codec involved)', () => {
+    for (const [id, e] of Object.entries(index.sets)) {
+      const set = sampleSetFromFile(index, id, readFileSync(join(dir, e.file)));
+      expect(set.sampleRate).toBe(index.sampleRate);
+      expect(set.zones.map((z) => z.data.length)).toEqual(e.zones.map((z) => z.length));
+      expect(set.zones.some((z) => z.data.some((v) => v !== 0))).toBe(true);
+    }
+  });
+
+  it('refuses a file that is not what the index lists', () => {
+    const [id, e] = Object.entries(index.sets)[0] as [string, (typeof index.sets)[string]];
+    const other = Object.values(index.sets).find((x) => x.frames !== e.frames)!;
+    expect(() => sampleSetFromFile(index, id, readFileSync(join(dir, other.file)))).toThrow(/frames/);
+    expect(() => sampleSetFromFile(index, id, new Uint8Array(64))).toThrow(new RegExp(`${id} could not be decoded`));
   });
 
   it('slices decoded audio by the index, and refuses audio of the wrong length', () => {

@@ -2,7 +2,7 @@
 // Renders music to a WAV file and prints loudness stats per second.
 // Usage: npm run render -- [--style demoscene] [--seed 42] [--seconds 60] [--out renders/out.wav] [--set id=value ...]
 // Requires a build (`npm run typecheck` emits packages/engine/dist). A collection
-// (--set instruments.collection=strings) loads its recordings with ffmpeg.
+// (--set instruments.collection=strings) loads its recordings with the engine's own decoder.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { renderOffline, encodeWav } from '../dist/index.js';

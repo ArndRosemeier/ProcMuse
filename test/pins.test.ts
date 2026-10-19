@@ -68,6 +68,11 @@ describe('pins', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('recording files are decoded only by the engine (sampleSetFromFile): no decodeAudioData, whose formats differ per browser', () => {
+    const all = ['engine', 'web', 'ui', 'visuals'].flatMap((pkg) => src(pkg)).concat(files(join(ROOT, 'apps/procmuse/src')));
+    expect(grep(all, /\bdecodeAudioData\b/)).toEqual([]);
+  });
+
   it('param ids are spelled only in engine/paramSpecs.ts (everyone else uses P)', () => {
     const offenders = grep(src('engine'), /['"`](music|sound|fx|master)\.[a-zA-Z]+['"`]/).filter((p) => !p.endsWith('engine/paramSpecs.ts'));
     expect(offenders).toEqual([]);

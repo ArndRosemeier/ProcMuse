@@ -22,7 +22,8 @@
 | Determinism | `composer.test > is deterministic`, `engine.test > is deterministic` | engine tests | use a non-seeded source |
 | Output never clips | `engine.test > renders finite audio that never exceeds full scale` | engine tests | bypass the limiter |
 | Oscillator fade and formant gain | `instruments.test > fades one oscillator…`, `> formant peaks are unity gain…` | `packages/engine/test/instruments.test.ts` | dropped the fade multiply and the peak normalization → both RED (watched 2026-10-15) |
-| Recorded instruments, casting, the shipped files | `samples.test` (repitch, loop, one-shot, range fold, loud missing samples, casting monotone in the amount, every collection renders, index ↔ files ↔ patches agree) | `packages/engine/test/samples.test.ts` | |
+| Recorded instruments, casting, the shipped files | `samples.test` (repitch, loop, one-shot, range fold, loud missing samples, casting monotone in the amount, every collection renders, index ↔ files ↔ patches agree, every shipped file decodes with the engine's decoder) | `packages/engine/test/samples.test.ts` | |
+| The FLAC decoder | `flac.test` (stereo decorrelation, 24-bit, fixed/LPC/constant subframes, MD5-verified fixtures, loud on damage) | `packages/engine/test/flac.test.ts`, fixtures in `test/fixtures/flac/` | |
 | Every param is an accessible control | `ui.test > every engine parameter becomes a named, described control` | `packages/ui/test/ui.test.ts` | drop the label `for` |
 
 | The app starts, plays, draws and answers the keyboard; every scene is selectable in the Visuals panel and draws; the Band panel switches instruments; no HTTP error | `npm run e2e` | `scripts/e2e.mjs` | drop `.pm-root [hidden]` (hidden panels show); remove the favicon link (404 → RED, watched 2026-10-15) |

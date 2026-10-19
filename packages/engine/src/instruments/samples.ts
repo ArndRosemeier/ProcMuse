@@ -1,9 +1,10 @@
 /**
  * Recorded instruments: sample sets and the bank that holds them.
  *
- * The engine never fetches or decodes audio (it is headless). A host decodes
- * recordings into PCM and hands them over as SampleSets; `validateSampleSet`
- * is the boundary, and a missing set is a loud error, never silence.
+ * The engine never fetches audio (it is headless). A host fetches the files,
+ * turns them into SampleSets with `sampleSetFromFile` (the engine's own
+ * decoder) and hands them over; `validateSampleSet` is the boundary, and a
+ * missing set is a loud error, never silence.
  */
 import { ProcMuseError } from '../core/errors.js';
 

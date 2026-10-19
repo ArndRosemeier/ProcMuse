@@ -2,11 +2,14 @@
  * The sample index: how a host finds and slices the recordings it downloads.
  *
  * scripts/samples/build.mjs writes one mono audio file per sample set plus an
- * index.json describing each file's zones. A host fetches and decodes the file
- * (the engine never touches audio files), then `sampleSetFromPcm` turns the PCM
- * into the SampleSet the engine plays. Both steps validate loudly.
+ * index.json describing each file's zones. A host fetches the file's bytes (the
+ * engine never fetches), then `sampleSetFromFile` decodes them with the engine's
+ * own FLAC decoder, so no browser's codec support matters, and
+ * `sampleSetFromPcm` slices the PCM into the SampleSet the engine plays. Every
+ * step validates loudly.
  */
 import { ProcMuseError } from '../core/errors.js';
+import { decodeFlac } from './flac.js';
 import { validateSampleSet, type SampleSet } from './samples.js';
 
 export interface SampleIndexZone {
@@ -79,4 +82,19 @@ export function sampleSetFromPcm(index: SampleIndex, id: string, pcm: Float32Arr
       loopEnd: z.loopEnd,
     })),
   });
+}
+
+/** Decodes one set's file (as listed in the index) and slices it: the one way file bytes become a SampleSet. */
+export function sampleSetFromFile(index: SampleIndex, id: string, bytes: ArrayBuffer | Uint8Array): SampleSet {
+  let audio;
+  try {
+    audio = decodeFlac(bytes);
+  } catch (err) {
+    throw new ProcMuseError('invalid-samples', `the recording ${id} could not be decoded (${(err as Error).message})`);
+  }
+  if (audio.sampleRate !== index.sampleRate) {
+    throw new ProcMuseError('invalid-samples', `${id} is recorded at ${audio.sampleRate} Hz, the index says ${index.sampleRate}`);
+  }
+  if (audio.channels.length !== 1) throw new ProcMuseError('invalid-samples', `${id} has ${audio.channels.length} channels, recordings are mono`);
+  return sampleSetFromPcm(index, id, audio.channels[0]!);
 }

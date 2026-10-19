@@ -3,9 +3,11 @@
 The state of record; one screen, overwritten in place. Reconcile with `bash scripts/board.sh`.
 
 ```
-reconciled: SEE_GIT · 2026-10-16
+reconciled: SEE_GIT · 2026-10-19
 
-SESSION | id=claude-projects thread "instruments" | state=landed: recorded-instrument collections (ledger 18)
+SESSION | id=claude-projects thread "instruments" | state=landed: recordings decode on every browser (ledger 19)
+
+LANDED | ledger=19 | recordings decode with the engine's own FLAC decoder, so collections import on Safari for iPad (gate GREEN, e2e GREEN)
 
 LANDED | ledger=18 | recorded-instrument collections: six collections (Broad Spectrum + five sections) from VSCO 2 CE, one-press download, Real instruments slider (gate GREEN, e2e GREEN)
 
@@ -30,7 +32,7 @@ RECOVERY | repo=https://github.com/ArndRosemeier/ProcMuse | branch=main | gate=b
 ## Guards
 
 - **`GUARD` — the suite lock.** `scripts/gate.sh` takes an atomic `mkdir` lock; a second run is refused (exit 9) and is VOID.
-- **`GUARD` — architecture pins.** `test/pins.test.ts` reds on a second PRNG, a second voice class, code in patch/style data, swing outside `rhythm.ts`, a DOM/Web Audio reference in the engine, or hand-spelled param ids.
+- **`GUARD` — architecture pins.** `test/pins.test.ts` reds on a second PRNG, a second voice class, code in patch/style data, swing outside `rhythm.ts`, a DOM/Web Audio reference in the engine, hand-spelled param ids, or `decodeAudioData` anywhere (recordings decode only through the engine).
 
 ## Traps
 
